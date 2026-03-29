@@ -9,8 +9,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
-    // Handle body parsing manually in case Vercel doesn't parse it
     let body = req.body;
+
     if (!body) {
       body = await new Promise((resolve) => {
         let data = '';
@@ -18,9 +18,8 @@ module.exports = async function handler(req, res) {
         req.on('end', () => resolve(JSON.parse(data)));
       });
     }
-    if (typeof body === 'string') body = JSON.parse(body);
 
-    const messages = body.messages;
+    if (typeof body === 'string') body = JSON.parse(body);
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -29,15 +28,16 @@ module.exports = async function handler(req, res) {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama3-8b-8192',
-        messages: messages,
+        model: 'llama-3.1-8b-instant', // ✅ FIXED
+        messages: body.messages,
         max_tokens: 1000
       })
     });
 
     const data = await response.json();
+
     res.status(200).json(data);
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
-}
+};
