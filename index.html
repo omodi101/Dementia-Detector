@@ -243,7 +243,7 @@ Write a concise clinical assessment (3-4 short paragraphs) for the doctor. Cover
 Be clinical, clear, and direct. Do not use bullet points. End with a brief note about the limitations of AI-based screening.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -253,7 +253,7 @@ Be clinical, clear, and direct. Do not use bullet points. End with a brief note 
       })
     });
     const data = await res.json();
-    const text = data.content?.find(b => b.type === 'text')?.text || 'Unable to generate analysis.';
+    const text = data.choices?.[0]?.message?.content || 'Unable to generate analysis.';
     document.getElementById('ai-text').textContent = text;
   } catch(e) {
     document.getElementById('ai-text').textContent = 'Error connecting to AI. Please try again.';
