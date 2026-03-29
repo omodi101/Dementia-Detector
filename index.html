@@ -1,264 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Early Dementia Detection Assistant</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
-    .app { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem; }
-    .header { margin-bottom: 1.5rem; }
-    .header h1 { font-size: 22px; font-weight: 600; }
-    .header p { font-size: 13px; color: #666; margin-top: 4px; }
-    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dbeafe; color: #1e40af; margin-bottom: 8px; }
-    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
-    .section-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
-    .field input[type=range] { width: 100%; }
-    .field-row { display: flex; align-items: center; gap: 12px; }
-    .field-row input[type=range] { flex: 1; }
-    .field-val { font-size: 13px; font-weight: 600; min-width: 24px; text-align: right; color: #1a1a1a; }
-    .field input[type=number] { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    select { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
-    textarea { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; resize: vertical; font-family: system-ui, sans-serif; }
-    .analyze-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; transition: opacity 0.15s; }
-    .analyze-btn:hover { opacity: 0.85; }
-    .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .result-card { border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; }
-    .result-high { background: #fef2f2; border-color: #fecaca; }
-    .result-mid { background: #fffbeb; border-color: #fde68a; }
-    .result-low { background: #f0fdf4; border-color: #bbf7d0; }
-    .result-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-    .result-high .result-title { color: #dc2626; }
-    .result-mid .result-title { color: #d97706; }
-    .result-low .result-title { color: #16a34a; }
-    .result-sub { font-size: 13px; color: #888; margin-bottom: 1rem; }
-    .score-bar-wrap { background: rgba(0,0,0,0.08); border-radius: 20px; height: 8px; margin-bottom: 1rem; overflow: hidden; }
-    .score-bar { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
-    .metric-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
-    .metric-row:last-child { border-bottom: none; }
-    .metric-label { color: #888; }
-    .metric-val { font-weight: 600; }
-    .ai-response { font-size: 14px; line-height: 1.7; color: #1a1a1a; white-space: pre-wrap; }
-    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .disclaimer { font-size: 11px; color: #aaa; margin-top: 1rem; line-height: 1.5; }
-    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px; margin: 2px; }
-    .tag-danger { background: #fee2e2; color: #dc2626; }
-    .tag-warning { background: #fef9c3; color: #b45309; }
-    .tag-success { background: #dcfce7; color: #16a34a; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dementia Clinical Assistant</title>
+
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.sub {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid #eee;
+}
+
+.section-title {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+label {
+  font-size: 13px;
+  color: #555;
+  display: block;
+  margin-bottom: 4px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 7px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.result {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.high { background: #fef2f2; }
+.mid { background: #fffbeb; }
+.low { background: #f0fdf4; }
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.ai {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.6;
+}
+</style>
 </head>
+
 <body>
 <div class="app">
-  <div class="header">
-    <div class="badge">Clinical Decision Support</div>
-    <h1>Early Dementia Detection Assistant</h1>
-    <p>Enter patient speech and cognitive assessment data to receive an AI-powered risk analysis.</p>
-  </div>
 
-  <div class="card">
-    <div class="section-title">Speech analysis metrics</div>
-    <div class="grid2">
-      <div class="field">
-        <label>Speech duration (seconds)</label>
-        <input type="number" id="duration" value="12" min="1" max="120" step="0.1" />
-      </div>
-      <div class="field">
-        <label>Speech segments detected</label>
-        <input type="number" id="chunks" value="30" min="1" max="100" />
-      </div>
-    </div>
-    <div class="field">
-      <label>Voice clarity score (MFCC composite)</label>
-      <div class="field-row">
-        <input type="range" id="mfcc" min="-3" max="3" step="0.1" value="0.5" oninput="document.getElementById('mfcc-val').textContent=parseFloat(this.value).toFixed(1)" />
-        <span class="field-val" id="mfcc-val">0.5</span>
-      </div>
-    </div>
-  </div>
+<h1>Clinical Dementia Assessment Tool</h1>
+<div class="sub">Decision support system for early cognitive impairment screening</div>
 
-  <div class="card">
-    <div class="section-title">Cognitive &amp; linguistic indicators</div>
-    <div class="field">
-      <label>Word-finding difficulty (1 = none, 10 = severe)</label>
-      <div class="field-row">
-        <input type="range" id="word-find" min="1" max="10" step="1" value="3" oninput="document.getElementById('wf-val').textContent=this.value" />
-        <span class="field-val" id="wf-val">3</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Sentence coherence (1 = incoherent, 10 = fully coherent)</label>
-      <div class="field-row">
-        <input type="range" id="coherence" min="1" max="10" step="1" value="8" oninput="document.getElementById('coh-val').textContent=this.value" />
-        <span class="field-val" id="coh-val">8</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Repetition frequency (1 = none, 10 = frequent)</label>
-      <div class="field-row">
-        <input type="range" id="repeat" min="1" max="10" step="1" value="2" oninput="document.getElementById('rep-val').textContent=this.value" />
-        <span class="field-val" id="rep-val">2</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Hesitation / pause rate (1 = normal, 10 = very frequent)</label>
-      <div class="field-row">
-        <input type="range" id="hesitation" min="1" max="10" step="1" value="3" oninput="document.getElementById('hes-val').textContent=this.value" />
-        <span class="field-val" id="hes-val">3</span>
-      </div>
-    </div>
-  </div>
+<div class="card">
+<div class="section-title">Patient Info</div>
 
-  <div class="card">
-    <div class="section-title">Patient context (optional)</div>
-    <div class="grid2">
-      <div class="field">
-        <label>Patient age</label>
-        <input type="number" id="age" value="72" min="40" max="100" />
-      </div>
-      <div class="field">
-        <label>Memory complaints reported</label>
-        <select id="memory">
-          <option value="none">None</option>
-          <option value="mild">Mild</option>
-          <option value="moderate">Moderate</option>
-          <option value="severe">Severe</option>
-        </select>
-      </div>
-    </div>
-    <div class="field">
-      <label>Clinician observations (free text)</label>
-      <textarea id="notes" rows="3" placeholder="e.g. Patient struggled to recall recent events, showed flat affect..."></textarea>
-    </div>
-  </div>
+<div class="field">
+<label>Age</label>
+<input type="number" id="age" value="72">
+</div>
 
-  <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze patient →</button>
-  <div id="result-area" style="margin-top:1rem;"></div>
-  <p class="disclaimer">⚠ This tool is for research and educational purposes only. It is not a substitute for clinical diagnosis. All findings should be reviewed by a qualified physician.</p>
+<div class="field">
+<label>Memory complaints</label>
+<select id="memory">
+<option value="none">None</option>
+<option value="mild">Mild</option>
+<option value="moderate">Moderate</option>
+<option value="severe">Severe</option>
+</select>
+</div>
+
+<div class="field">
+<label>Clinical Notes</label>
+<textarea id="notes"></textarea>
+</div>
+</div>
+
+<div class="card">
+<div class="section-title">Speech & Cognitive Indicators</div>
+
+<div class="field">
+<label>Word Finding</label>
+<select id="word">
+<option value="1">None</option>
+<option value="4">Mild</option>
+<option value="7">Moderate</option>
+<option value="10">Severe</option>
+</select>
+</div>
+
+<div class="field">
+<label>Sentence Coherence</label>
+<select id="coherence">
+<option value="10">Normal</option>
+<option value="6">Mild impairment</option>
+<option value="4">Moderate impairment</option>
+<option value="1">Severe impairment</option>
+</select>
+</div>
+
+<div class="field">
+<label>Repetition</label>
+<select id="repeat">
+<option value="1">None</option>
+<option value="4">Mild</option>
+<option value="7">Moderate</option>
+<option value="10">Frequent</option>
+</select>
+</div>
+
+<div class="field">
+<label>Hesitation</label>
+<select id="hesitation">
+<option value="1">Normal</option>
+<option value="4">Mild</option>
+<option value="7">Moderate</option>
+<option value="10">Severe</option>
+</select>
+</div>
+
+</div>
+
+<button onclick="analyze()">Analyze Patient</button>
+
+<div id="output"></div>
+
 </div>
 
 <script>
 async function analyze() {
-  const btn = document.getElementById('analyze-btn');
-  const area = document.getElementById('result-area');
 
-  const duration = parseFloat(document.getElementById('duration').value);
-  const chunks = parseInt(document.getElementById('chunks').value);
-  const mfcc = parseFloat(document.getElementById('mfcc').value);
-  const wordFind = parseInt(document.getElementById('word-find').value);
-  const coherence = parseInt(document.getElementById('coherence').value);
-  const repeat = parseInt(document.getElementById('repeat').value);
-  const hesitation = parseInt(document.getElementById('hesitation').value);
-  const age = parseInt(document.getElementById('age').value);
-  const memory = document.getElementById('memory').value;
-  const notes = document.getElementById('notes').value;
+const age = parseInt(age.value);
+const memory = memory.value;
+const notes = notes.value;
+const word = parseInt(document.getElementById('word').value);
+const coherence = parseInt(document.getElementById('coherence').value);
+const repeat = parseInt(document.getElementById('repeat').value);
+const hesitation = parseInt(document.getElementById('hesitation').value);
 
-  let risk = 0;
-  if (wordFind >= 7) risk += 25;
-  else if (wordFind >= 5) risk += 12;
-  if (coherence <= 4) risk += 25;
-  else if (coherence <= 6) risk += 10;
-  if (repeat >= 7) risk += 20;
-  else if (repeat >= 5) risk += 10;
-  if (hesitation >= 7) risk += 15;
-  else if (hesitation >= 5) risk += 7;
-  if (age >= 80) risk += 10;
-  else if (age >= 70) risk += 5;
-  if (memory === 'severe') risk += 15;
-  else if (memory === 'moderate') risk += 8;
-  else if (memory === 'mild') risk += 3;
-  if (chunks < 10) risk += 5;
-  if (duration < 5) risk += 5;
-  risk = Math.min(risk, 98);
+let risk = 0;
 
-  const level = risk >= 60 ? 'high' : risk >= 30 ? 'mid' : 'low';
-  const barColor = level === 'high' ? '#dc2626' : level === 'mid' ? '#d97706' : '#16a34a';
-  const levelLabel = level === 'high' ? 'High risk' : level === 'mid' ? 'Moderate risk' : 'Low risk';
+if (word >= 7) risk += 25;
+if (coherence <= 4) risk += 25;
+if (repeat >= 7) risk += 20;
+if (hesitation >= 7) risk += 15;
+if (age >= 70) risk += 10;
+if (memory === "severe") risk += 15;
 
-  const redFlags = [];
-  if (wordFind >= 7) redFlags.push({text: 'Severe word-finding difficulty', level: 'danger'});
-  if (coherence <= 4) redFlags.push({text: 'Poor sentence coherence', level: 'danger'});
-  if (repeat >= 7) redFlags.push({text: 'Frequent repetition', level: 'danger'});
-  if (hesitation >= 7) redFlags.push({text: 'High hesitation rate', level: 'danger'});
-  if (wordFind >= 5 && wordFind < 7) redFlags.push({text: 'Moderate word-finding difficulty', level: 'warning'});
-  if (coherence > 4 && coherence <= 6) redFlags.push({text: 'Reduced sentence coherence', level: 'warning'});
-  if (repeat >= 5 && repeat < 7) redFlags.push({text: 'Some repetitive speech', level: 'warning'});
-  if (memory === 'severe') redFlags.push({text: 'Severe memory complaints', level: 'danger'});
-  else if (memory === 'moderate') redFlags.push({text: 'Moderate memory complaints', level: 'warning'});
+let level = risk > 60 ? "high" : risk > 30 ? "mid" : "low";
 
-  area.innerHTML = `
-    <div class="result-card result-${level}">
-      <div class="result-title">${levelLabel} — ${risk}% estimated dementia risk</div>
-      <div class="result-sub">Based on speech and cognitive indicators</div>
-      <div class="score-bar-wrap"><div class="score-bar" id="score-bar" style="width:0%;background:${barColor}"></div></div>
-      <div style="margin-bottom:0.75rem;">
-        ${redFlags.length > 0 ? redFlags.map(f => `<span class="tag tag-${f.level}">${f.text}</span>`).join('') : '<span class="tag tag-success">No significant red flags detected</span>'}
-      </div>
-      <div>
-        <div class="metric-row"><span class="metric-label">Speech duration</span><span class="metric-val">${duration.toFixed(1)}s</span></div>
-        <div class="metric-row"><span class="metric-label">Speech segments</span><span class="metric-val">${chunks}</span></div>
-        <div class="metric-row"><span class="metric-label">Voice clarity (MFCC)</span><span class="metric-val">${mfcc.toFixed(1)}</span></div>
-        <div class="metric-row"><span class="metric-label">Patient age</span><span class="metric-val">${age}</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-title">AI clinical analysis</div>
-      <div class="ai-response" id="ai-text"><span class="spinner"></span> Generating clinical assessment...</div>
-    </div>
-  `;
+let primary = "None";
+if (word >= 7) primary = "Language impairment";
+else if (coherence <= 4) primary = "Disorganized speech";
 
-  setTimeout(() => {
-    const bar = document.getElementById('score-bar');
-    if (bar) bar.style.width = risk + '%';
-  }, 100);
+let confidence = risk > 60 ? "High" : risk > 30 ? "Moderate" : "Low";
 
-  btn.disabled = true;
-  btn.textContent = 'Analyzing...';
+document.getElementById("output").innerHTML = `
+<div class="card result ${level}">
+<b>Clinical Risk Score:</b> ${risk}%<br>
+<b>Risk Level:</b> ${level.toUpperCase()}<br>
+<b>Primary Concern:</b> ${primary}<br>
+<b>Confidence:</b> ${confidence}
+</div>
 
-  const prompt = `You are a clinical AI assistant helping doctors assess early signs of dementia based on patient speech and cognitive data.
+<div class="card">
+<div class="section-title">AI Clinical Assessment</div>
+<div class="ai" id="ai">Loading...</div>
+</div>
+`;
 
-Patient data:
-- Age: ${age}
-- Speech duration: ${duration.toFixed(1)} seconds
-- Speech segments: ${chunks}
-- Voice clarity score (MFCC): ${mfcc.toFixed(1)} (range -3 to 3, higher = clearer)
-- Word-finding difficulty: ${wordFind}/10
-- Sentence coherence: ${coherence}/10
-- Repetition frequency: ${repeat}/10
-- Hesitation/pause rate: ${hesitation}/10
-- Memory complaints: ${memory}
-- Clinician notes: ${notes || 'None provided'}
-- Calculated risk score: ${risk}%
+const prompt = `
+Provide a structured clinical assessment.
 
-Write a concise clinical assessment (3-4 short paragraphs) for the doctor. Cover:
-1. Summary of key findings from the speech and linguistic indicators
-2. What these patterns may indicate clinically
-3. Recommended next steps (specific tests, referrals, follow-up timeline)
+Summary:
+Clinical Interpretation:
+Next Steps:
+Limitations:
 
-Be clinical, clear, and direct. Do not use bullet points. End with a brief note about the limitations of AI-based screening.`;
+Patient age: ${age}
+Risk score: ${risk}
+`;
 
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-console.log(JSON.stringify(data));
-const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) ? data.choices[0].message.content : JSON.stringify(data);
-    document.getElementById('ai-text').textContent = text;
-  } catch(e) {
-    document.getElementById('ai-text').textContent = 'Error connecting to AI. Please try again.';
-  }
+const res = await fetch('/api/chat', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({
+messages:[{role:'user', content: prompt}]
+})
+});
 
-  btn.disabled = false;
-  btn.textContent = 'Analyze patient →';
+const data = await res.json();
+document.getElementById("ai").textContent =
+data?.choices?.[0]?.message?.content || "Error";
 }
 </script>
 </body>
