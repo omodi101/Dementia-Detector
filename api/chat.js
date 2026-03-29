@@ -1,6 +1,9 @@
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  let body = req.body;
+  if (typeof body === 'string') body = JSON.parse(body);
+
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -9,7 +12,7 @@ module.exports = async function handler(req, res) {
     },
     body: JSON.stringify({
       model: 'llama3-8b-8192',
-      messages: req.body.messages,
+      messages: body.messages,
       max_tokens: 1000
     })
   });
