@@ -17,7 +17,13 @@ module.exports = async function handler(req, res) {
     })
   });
 
-  const data = await response.json();
-  res.status(200).json(data);
+  const text = await response.text();
+  console.log('Groq response:', text);
+  
+  try {
+    const data = JSON.parse(text);
+    res.status(200).json(data);
+  } catch(e) {
+    res.status(500).json({ error: text });
+  }
 }
-
