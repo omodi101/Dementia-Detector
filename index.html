@@ -250,7 +250,8 @@ Be clinical, clear, and direct. Do not use bullet points. End with a brief note 
       })
     });
     const data = await res.json();
-    const text = data.choices?.[0]?.message?.content || 'Unable to generate analysis.';
+console.log(JSON.stringify(data));
+const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) ? data.choices[0].message.content : JSON.stringify(data);
     document.getElementById('ai-text').textContent = text;
   } catch(e) {
     document.getElementById('ai-text').textContent = 'Error connecting to AI. Please try again.';
