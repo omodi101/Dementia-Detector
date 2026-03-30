@@ -1,22 +1,19 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NeuroClear — Clinical Screening</title>
+  <title>Dementia Detector — Clinical Screening</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    :root{--ink:#2d2d2a;--ink2:#4a4a44;--ink3:#8a8a7a;--bg:#f5f0e8;--surface:#fdfaf4;--border:#ddd8cc;--border2:#d6d3d1;--red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;--amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;--green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;}
+    :root{--ink:#2d2d2a;--ink2:#4a4a44;--ink3:#8a8a7a;--bg:#f5f0e8;--surface:#fdfaf4;--border:#ddd8cc;--border2:#c8c4b8;--red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;--amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;--green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;}
     *{box-sizing:border-box;margin:0;padding:0}
-    background:linear-gradient(135deg,#4a5c3a,#6b7c4e)
-    background:linear-gradient(135deg,#4a5c3a,#6b7c4e)
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
-    nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
-    .nav-logo{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.02em;color:var(--ink);text-decoration:none}
-    .nav-logo span{color:var(--ink3)}
-    .nav-back{font-size:13px;color:var(--ink2);text-decoration:none;display:flex;align-items:center;gap:6px}
-    .nav-back:hover{color:var(--ink)}
+    nav{background:linear-gradient(135deg,#4a5c3a,#6b7c4e);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+    .nav-logo{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.02em;color:#fff;text-decoration:none}
+    .nav-logo span{color:rgba(255,255,255,0.4)}
+    .nav-back{font-size:13px;color:rgba(255,255,255,0.8);text-decoration:none;display:flex;align-items:center;gap:6px}
+    .nav-back:hover{color:#fff}
     .app{max-width:780px;margin:0 auto;padding:2rem 1.5rem 4rem}
     .page-title{margin-bottom:2rem}
     .page-title h1{font-family:'Instrument Serif',serif;font-size:32px;font-weight:400;letter-spacing:-0.02em;line-height:1.2;margin-bottom:6px}
@@ -42,13 +39,13 @@
     .radio-opt{position:relative}
     .radio-opt input{position:absolute;opacity:0;width:0;height:0}
     .radio-opt label{display:block;padding:7px 14px;border:1px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.15s;color:var(--ink2)}
-    .radio-opt input:checked+label{background:var(--ink);color:#fff;border-color:var(--ink)}
-    .radio-opt label:hover{border-color:var(--ink);color:var(--ink)}
+    .radio-opt input:checked+label{background:#4a5c3a;color:#fff;border-color:#4a5c3a}
+    .radio-opt label:hover{border-color:#4a5c3a;color:#4a5c3a}
     .checkbox-group{display:flex;flex-direction:column;gap:8px}
     .check-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer}
-    .check-opt input{width:15px;height:15px;cursor:pointer;accent-color:var(--ink);flex-shrink:0}
+    .check-opt input{width:15px;height:15px;cursor:pointer;accent-color:#4a5c3a;flex-shrink:0}
     .check-opt span{font-size:13px}
-    .analyze-btn{width:100%;padding:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;border-radius:12px;background:var(--ink);color:#fff;cursor:pointer;transition:opacity 0.15s;margin-top:0.5rem}
+    .analyze-btn{width:100%;padding:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;border-radius:12px;background:linear-gradient(135deg,#4a5c3a,#6b7c4e);color:#fff;cursor:pointer;transition:opacity 0.15s;margin-top:0.5rem}
     .analyze-btn:hover{opacity:0.85}
     .analyze-btn:disabled{opacity:0.4;cursor:not-allowed}
     .result-wrap{margin-top:1.5rem}
@@ -87,16 +84,16 @@
     .ai-text{font-size:14px;line-height:1.8;color:var(--ink);white-space:pre-wrap}
     .spinner{display:inline-block;width:12px;height:12px;border:1.5px solid var(--border);border-top-color:var(--ink2);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .therapy-cta{background:var(--ink);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .therapy-cta{background:linear-gradient(135deg,#4a5c3a,#6b7c4e);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     .therapy-cta p{color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px}
     .therapy-cta h3{color:#fff;font-size:16px;font-weight:500}
-    .therapy-cta a{padding:10px 20px;background:#fff;color:var(--ink);border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;flex-shrink:0}
+    .therapy-cta a{padding:10px 20px;background:#fff;color:#4a5c3a;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;flex-shrink:0}
     .disclaimer{font-size:11px;color:var(--ink3);line-height:1.6;margin-top:1.5rem}
   </style>
 </head>
 <body>
 <nav>
-  <a class="nav-logo" href="index.html">NeuroClear<span>.</span></a>
+  <a class="nav-logo" href="index.html">Dementia Detector<span>.</span></a>
   <a class="nav-back" href="index.html">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     Back to home
@@ -223,7 +220,6 @@
 <script>
 function adj(id,delta){const el=document.getElementById(id);el.value=Math.max(parseInt(el.min)||0,Math.min(parseInt(el.max)||999,parseInt(el.value||0)+delta));}
 function getRadio(name){const el=document.querySelector(`input[name="${name}"]:checked`);return el?el.value:null;}
-
 function calcRisk(){
   const pauses=parseInt(document.getElementById('pauses').value)||0;
   const repeats=parseInt(document.getElementById('repeats').value)||0;
@@ -251,7 +247,6 @@ function calcRisk(){
   const risk=Math.min(Math.round(factors.reduce((a,f)=>a+f.score,0)),98);
   return{risk,factors};
 }
-
 async function analyze(){
   const btn=document.getElementById('analyze-btn');
   btn.disabled=true;btn.textContent='Analyzing...';
@@ -277,7 +272,6 @@ async function analyze(){
   const bLabels={'b-adl':'Difficulty with daily activities','b-lost':'Getting lost in familiar places','b-mood':'Mood or personality changes','b-social':'Withdrawal from social activities','b-sleep':'Sleep disturbances'};
   const behaviors=['b-adl','b-lost','b-mood','b-social','b-sleep'].filter(id=>document.getElementById(id).checked).map(id=>bLabels[id]);
   const redFlags=factors.filter(f=>f.max>0&&f.score/f.max>=0.7).map(f=>({t:f.name,l:'red'})).concat(factors.filter(f=>f.max>0&&f.score/f.max>=0.4&&f.score/f.max<0.7).map(f=>({t:f.name,l:'amber'})));
-
   document.getElementById('result-area').innerHTML=`
     <div class="result-wrap">
       <div class="risk-banner risk-${level}">
@@ -302,17 +296,15 @@ async function analyze(){
         <div class="ai-text" id="ai-text"><span class="spinner"></span> Generating assessment...</div>
       </div>
       <div class="therapy-cta">
-        <div><h3>Recommend cognitive therapy?</h3><p>Send your patient to NeuroClear's brain training suite to help slow cognitive decline.</p></div>
+        <div><h3>Recommend cognitive therapy?</h3><p>Send your patient to the brain training suite to help slow cognitive decline.</p></div>
         <a href="therapy.html">Open therapy →</a>
       </div>
     </div>`;
-
   setTimeout(()=>{
     const bar=document.getElementById('main-bar');
     if(bar)bar.style.width=risk+'%';
     document.querySelectorAll('.factor-bar-inner').forEach(b=>setTimeout(()=>b.style.width=b.dataset.w+'%',50));
   },50);
-
   const prompt=`You are a clinical AI assistant helping doctors screen for early dementia. Write a concise 3-paragraph clinical assessment.
 Patient: ${age} year old ${sex}, education: ${education}
 Chief complaint: ${complaint||'Not provided'}
@@ -322,7 +314,6 @@ Behavioral: ${behaviors.length?behaviors.join(', '):'None'}
 Notes: ${notes||'None'}
 Risk score: ${risk}%
 Paragraph 1: Most clinically significant findings. Paragraph 2: Diagnostic interpretation. Paragraph 3: Specific next steps — tests, referrals, follow-up timeline. End with one sentence on AI limitations. Be direct and clinical. No bullet points.`;
-
   try{
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
     const raw=await res.text();
