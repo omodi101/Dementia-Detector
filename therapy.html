@@ -3,79 +3,73 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NeuroClear — Cognitive Therapy</title>
+  <title>Dementia Detector — Cognitive Therapy</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root{--ink:#1c1917;--ink2:#57534e;--ink3:#a8a29e;--bg:#fafaf9;--surface:#fff;--border:#e7e5e4;--border2:#d6d3d1;--green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;--red:#dc2626;--amber:#d97706;}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
-    nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
-    .nav-logo{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.02em;color:var(--ink);text-decoration:none}
-    .nav-logo span{color:var(--ink3)}
-    .nav-back{font-size:13px;color:var(--ink2);text-decoration:none;display:flex;align-items:center;gap:6px}
-    .nav-back:hover{color:var(--ink)}
+    nav{background:linear-gradient(135deg,#1e3a8a,#7c3aed);border-bottom:none;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+    .nav-logo{font-family:"Instrument Serif",serif;font-size:22px;letter-spacing:-0.02em;color:#fff;text-decoration:none}
+    .nav-logo span{color:rgba(255,255,255,0.4)}
+    .nav-back{font-size:13px;color:rgba(255,255,255,0.8);text-decoration:none;display:flex;align-items:center;gap:6px}
+    .nav-back:hover{color:#fff}
     .app{max-width:820px;margin:0 auto;padding:2rem 1.5rem 4rem}
     .page-title{margin-bottom:2rem}
     .page-title h1{font-family:'Instrument Serif',serif;font-size:32px;font-weight:400;letter-spacing:-0.02em;line-height:1.2;margin-bottom:6px}
     .page-title p{font-size:13px;color:var(--ink2)}
-    /* Session score bar */
     .score-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
     .score-item{text-align:center}
     .score-val{font-family:'Instrument Serif',serif;font-size:24px;color:var(--ink);line-height:1}
     .score-lbl{font-size:11px;color:var(--ink3);margin-top:2px}
-    /* Game tabs */
     .game-tabs{display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
     .game-tab{padding:10px 18px;border:1px solid var(--border);border-radius:10px;background:var(--surface);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--ink2);transition:all 0.15s}
-    .game-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .game-tab.active{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-color:#2563eb}
     .game-tab:hover:not(.active){border-color:var(--ink);color:var(--ink)}
-    /* Game area */
     .game-area{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;min-height:420px}
     .game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
     .game-title{font-family:'Instrument Serif',serif;font-size:20px;font-weight:400}
     .game-badge{font-size:11px;color:var(--ink3);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
     .game-desc{font-size:13px;color:var(--ink2);margin-bottom:1.5rem;line-height:1.6}
-    .game-btn{padding:10px 24px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s}
+    .game-btn{padding:10px 24px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity 0.15s}
     .game-btn:hover{opacity:0.85}
-    .game-btn-outline{padding:10px 24px;background:var(--surface);color:var(--ink);border:1px solid var(--border2);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
-    .game-btn-outline:hover{border-color:var(--ink)}
     .result-msg{padding:12px 16px;border-radius:10px;font-size:14px;margin-top:1rem;font-weight:500}
     .result-correct{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
     .result-wrong{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
-    .result-info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-    /* Matching game */
     .match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
     .match-card{aspect-ratio:1;border:2px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;background:var(--bg);transition:all 0.2s;user-select:none}
     .match-card:hover:not(.flipped):not(.matched){border-color:var(--ink);background:var(--surface)}
-    .match-card.flipped{background:var(--surface);border-color:var(--ink)}
+    .match-card.flipped{background:var(--surface);border-color:#2563eb}
     .match-card.matched{background:var(--green-bg);border-color:var(--green-border);cursor:default}
     .match-card .front{display:none}
     .match-card .back{font-size:22px;color:var(--ink3)}
     .match-card.flipped .front,.match-card.matched .front{display:flex}
     .match-card.flipped .back,.match-card.matched .back{display:none}
-    /* Pattern game */
     .pattern-display{display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;min-height:60px;align-items:center}
     .pattern-item{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid var(--border);background:var(--surface)}
-    .pattern-item.highlight{border-color:var(--ink);background:var(--bg)}
     .pattern-choices{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem}
     .pattern-choice{width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid var(--border);background:var(--surface);cursor:pointer;transition:all 0.15s}
-    .pattern-choice:hover{border-color:var(--ink)}
-    /* Object naming */
+    .pattern-choice:hover{border-color:#2563eb}
     .object-display{text-align:center;padding:2rem;background:var(--bg);border-radius:12px;margin-bottom:1.5rem;font-size:80px;line-height:1}
     .object-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
     .object-choice{padding:12px 16px;border:2px solid var(--border);border-radius:10px;background:var(--surface);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:left}
-    .object-choice:hover{border-color:var(--ink)}
+    .object-choice:hover{border-color:#2563eb}
     .object-choice.correct{background:var(--green-bg);border-color:var(--green);color:var(--green)}
     .object-choice.wrong{background:#fef2f2;border-color:var(--red);color:var(--red)}
     .progress-row{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
     .progress-track{flex:1;background:var(--bg);border-radius:20px;height:6px;overflow:hidden}
-    .progress-fill{height:100%;background:var(--ink);border-radius:20px;transition:width 0.4s ease}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#2563eb,#7c3aed);border-radius:20px;transition:width 0.4s ease}
     .progress-txt{font-size:12px;color:var(--ink3);white-space:nowrap}
-    .disclaimer{font-size:11px;color:var(--ink3);line-height:1.6;margin-top:1.5rem}
+    .difficulty-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px}
+    .diff-easy{background:#dcfce7;color:#16a34a}
+    .diff-medium{background:#fef9c3;color:#b45309}
+    .diff-hard{background:#fee2e2;color:#dc2626}
+    .disclaimer{font-size:11px;color:var(--ink3);line-height:1.6}
   </style>
 </head>
 <body>
 <nav>
-  <a class="nav-logo" href="index.html">NeuroClear<span>.</span></a>
+  <a class="nav-logo" href="index.html">Dementia Detector<span>.</span></a>
   <a class="nav-back" href="index.html">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
     Back to home
@@ -107,13 +101,13 @@
       <div class="game-title">Memory matching</div>
       <div class="game-badge">Memory & concentration</div>
     </div>
-    <div class="game-desc">Find all matching pairs by flipping two cards at a time. This exercise strengthens short-term memory and concentration — two of the earliest functions affected by dementia.</div>
+    <div class="game-desc">Find all matching pairs by flipping two cards at a time. Each new game picks 8 random pairs from a large pool so it's always different!</div>
     <div class="progress-row">
       <div class="progress-track"><div class="progress-fill" id="match-progress" style="width:0%"></div></div>
       <div class="progress-txt" id="match-progress-txt">0 / 8 pairs</div>
     </div>
     <div class="match-grid" id="match-grid"></div>
-    <div style="display:flex;gap:10px;align-items:center">
+    <div style="display:flex;gap:10px;align-items:center;margin-top:1rem">
       <button class="game-btn" onclick="initMemory()">New game</button>
       <span style="font-size:12px;color:var(--ink3)" id="match-moves">Moves: 0</span>
     </div>
@@ -126,7 +120,7 @@
       <div class="game-title">Pattern recognition</div>
       <div class="game-badge">Logic & reasoning</div>
     </div>
-    <div class="game-desc">Identify what comes next in the sequence. Pattern recognition exercises the prefrontal cortex and helps maintain executive function — critical for daily decision-making.</div>
+    <div class="game-desc">Identify what comes next in the sequence. Questions are randomly selected each round and increase in difficulty as you progress.</div>
     <div class="progress-row">
       <div class="progress-track"><div class="progress-fill" id="pattern-progress" style="width:0%"></div></div>
       <div class="progress-txt" id="pattern-progress-txt">Question 0 / 10</div>
@@ -140,7 +134,7 @@
       <div class="game-title">Object naming</div>
       <div class="game-badge">Language & recall</div>
     </div>
-    <div class="game-desc">Identify the object shown. Language and object naming are among the earliest abilities affected in dementia. Regular practice helps maintain the neural pathways for word retrieval.</div>
+    <div class="game-desc">Identify the object shown. Questions are randomly drawn from a large bank so you'll rarely see the same ones twice in a row.</div>
     <div class="progress-row">
       <div class="progress-track"><div class="progress-fill" id="naming-progress" style="width:0%"></div></div>
       <div class="progress-txt" id="naming-progress-txt">Question 0 / 10</div>
@@ -149,24 +143,31 @@
   </div>
 </div>
 
-<p class="disclaimer" style="max-width:820px;margin:0 auto;padding:0 1.5rem 3rem">⚠ These exercises are for cognitive stimulation purposes only and are not a medical treatment. They should complement, not replace, medical care. Consult a physician for any health concerns.</p>
+<p class="disclaimer" style="max-width:820px;margin:0 auto;padding:0 1.5rem 3rem">⚠ These exercises are for cognitive stimulation purposes only and are not a medical treatment. They should complement, not replace, medical care.</p>
 
 <script>
 let totalScore=0,gamesDone=0,streak=0;
 function updateStats(){document.getElementById('total-score').textContent=totalScore;document.getElementById('games-done').textContent=gamesDone;document.getElementById('streak').textContent=streak;}
 function addScore(pts){totalScore+=pts;streak++;updateStats();}
 function resetStreak(){streak=0;updateStats();}
-
 function switchGame(g){
-  ['memory','pattern','naming'].forEach(id=>{
+  ['memory','pattern','naming'].forEach((id,i)=>{
     document.getElementById('game-'+id).style.display=id===g?'block':'none';
-    document.querySelectorAll('.game-tab').forEach((t,i)=>t.classList.toggle('active',['memory','pattern','naming'][i]===g));
+    document.querySelectorAll('.game-tab')[i].classList.toggle('active',id===g);
   });
 }
 
-/* ===== MEMORY MATCHING ===== */
-const emojis=['🍎','🐘','🌸','🎸','🚂','🦋','🍋','🏠'];
-let matchFlipped=[],matchMatched=0,matchMoves=0,matchLocked=false;
+/* ===== MEMORY MATCHING — large emoji pool, picks 8 random pairs each game ===== */
+const emojiPool=[
+  '🍎','🐘','🌸','🎸','🚂','🦋','🍋','🏠',
+  '🐬','🌵','🎺','🍕','🚀','🦊','🌈','🎭',
+  '🐙','🍓','🎻','🚁','🦁','🌊','🎪','🍦',
+  '🐼','🌮','🎷','🚂','🦄','🌺','🎠','🍰',
+  '🐸','🥝','🎹','🛸','🦅','🌻','🎡','🍩',
+  '🐋','🍑','🥁','🏔️','🦓','🌷','🎢','🧁',
+];
+
+let matchFlipped=[],matchMatched=0,matchMoves=0,matchLocked=false,currentEmojis=[];
 
 function initMemory(){
   matchFlipped=[];matchMatched=0;matchMoves=0;matchLocked=false;
@@ -174,9 +175,11 @@ function initMemory(){
   document.getElementById('match-moves').textContent='Moves: 0';
   document.getElementById('match-progress').style.width='0%';
   document.getElementById('match-progress-txt').textContent='0 / 8 pairs';
-  const cards=[...emojis,...emojis].sort(()=>Math.random()-0.5);
-  const grid=document.getElementById('match-grid');
-  grid.innerHTML=cards.map((e,i)=>`
+  // Pick 8 random unique emojis from pool
+  const shuffledPool=[...emojiPool].sort(()=>Math.random()-0.5);
+  currentEmojis=shuffledPool.slice(0,8);
+  const cards=[...currentEmojis,...currentEmojis].sort(()=>Math.random()-0.5);
+  document.getElementById('match-grid').innerHTML=cards.map((e,i)=>`
     <div class="match-card" id="mc-${i}" onclick="flipCard(${i},'${e}')">
       <span class="front" style="font-size:28px">${e}</span>
       <span class="back">?</span>
@@ -196,15 +199,15 @@ function flipCard(idx,emoji){
     if(matchFlipped[0].emoji===matchFlipped[1].emoji){
       matchFlipped.forEach(c=>c.el.classList.replace('flipped','matched'));
       matchMatched++;
-      const pct=Math.round(matchMatched/8*100);
-      document.getElementById('match-progress').style.width=pct+'%';
+      document.getElementById('match-progress').style.width=Math.round(matchMatched/8*100)+'%';
       document.getElementById('match-progress-txt').textContent=matchMatched+' / 8 pairs';
       matchFlipped=[];matchLocked=false;
       addScore(10);
       if(matchMatched===8){
         gamesDone++;updateStats();
-        document.getElementById('match-result').innerHTML=`<div class="result-msg result-correct">🎉 Excellent! All pairs found in ${matchMoves} moves. +${Math.max(10,80-matchMoves*2)} bonus points!</div>`;
-        totalScore+=Math.max(10,80-matchMoves*2);updateStats();
+        const bonus=Math.max(10,80-matchMoves*2);
+        totalScore+=bonus;updateStats();
+        document.getElementById('match-result').innerHTML=`<div class="result-msg result-correct">🎉 All pairs found in ${matchMoves} moves! +${bonus} bonus points!</div>`;
       }
     } else {
       resetStreak();
@@ -213,40 +216,63 @@ function flipCard(idx,emoji){
   }
 }
 
-/* ===== PATTERN RECOGNITION ===== */
-const patterns=[
-  {seq:['🔴','🔵','🔴','🔵','🔴'],answer:'🔵',choices:['🔵','🟢','🟡','🔴']},
-  {seq:['🐱','🐱','🐶','🐱','🐱'],answer:'🐶',choices:['🐱','🐶','🐸','🐭']},
-  {seq:['⭐','⭐','⭐','🌙','⭐','⭐','⭐'],answer:'🌙',choices:['⭐','🌙','☀️','🌟']},
-  {seq:['🍎','🍊','🍋','🍎','🍊'],answer:'🍋',choices:['🍎','🍊','🍋','🍇']},
-  {seq:['🔺','🔷','🔺','🔷','🔺'],answer:'🔷',choices:['🔺','🔷','🔸','🔹']},
-  {seq:['1️⃣','2️⃣','3️⃣','1️⃣','2️⃣'],answer:'3️⃣',choices:['1️⃣','2️⃣','3️⃣','4️⃣']},
-  {seq:['🌞','🌧️','🌞','🌧️','🌞'],answer:'🌧️',choices:['🌞','🌧️','⛅','🌈']},
-  {seq:['🎵','🎵','🎶','🎵','🎵'],answer:'🎶',choices:['🎵','🎶','🎸','🎹']},
-  {seq:['🟥','🟥','🟦','🟥','🟥'],answer:'🟦',choices:['🟥','🟦','🟩','🟨']},
-  {seq:['🐘','🐭','🐘','🐭','🐘'],answer:'🐭',choices:['🐘','🐭','🦁','🐻']},
+/* ===== PATTERN RECOGNITION — large bank, randomly selects 10 each round ===== */
+const allPatterns=[
+  {seq:['🔴','🔵','🔴','🔵','🔴'],answer:'🔵',choices:['🔵','🟢','🟡','🔴'],diff:'easy'},
+  {seq:['🐱','🐱','🐶','🐱','🐱'],answer:'🐶',choices:['🐱','🐶','🐸','🐭'],diff:'easy'},
+  {seq:['⭐','⭐','⭐','🌙','⭐','⭐','⭐'],answer:'🌙',choices:['⭐','🌙','☀️','🌟'],diff:'easy'},
+  {seq:['🍎','🍊','🍋','🍎','🍊'],answer:'🍋',choices:['🍎','🍊','🍋','🍇'],diff:'easy'},
+  {seq:['🔺','🔷','🔺','🔷','🔺'],answer:'🔷',choices:['🔺','🔷','🔸','🔹'],diff:'easy'},
+  {seq:['🌞','🌧️','🌞','🌧️','🌞'],answer:'🌧️',choices:['🌞','🌧️','⛅','🌈'],diff:'easy'},
+  {seq:['🟥','🟥','🟦','🟥','🟥'],answer:'🟦',choices:['🟥','🟦','🟩','🟨'],diff:'easy'},
+  {seq:['🐘','🐭','🐘','🐭','🐘'],answer:'🐭',choices:['🐘','🐭','🦁','🐻'],diff:'easy'},
+  {seq:['🍕','🍔','🍕','🍔','🍕'],answer:'🍔',choices:['🍕','🍔','🌮','🌯'],diff:'easy'},
+  {seq:['🚗','🚗','🚌','🚗','🚗'],answer:'🚌',choices:['🚗','🚌','🚕','🚙'],diff:'easy'},
+  {seq:['🌹','🌹','🌻','🌹','🌹'],answer:'🌻',choices:['🌹','🌻','🌷','🌸'],diff:'easy'},
+  {seq:['🎵','🎵','🎶','🎵','🎵'],answer:'🎶',choices:['🎵','🎶','🎸','🎹'],diff:'easy'},
+  {seq:['🟦','🟩','🟦','🟩','🟦'],answer:'🟩',choices:['🟦','🟩','🟨','🟥'],diff:'medium'},
+  {seq:['🐸','🐸','🐸','🦊','🐸','🐸','🐸'],answer:'🦊',choices:['🐸','🦊','🐰','🐻'],diff:'medium'},
+  {seq:['🍋','🍊','🍎','🍋','🍊'],answer:'🍎',choices:['🍋','🍊','🍎','🍇'],diff:'medium'},
+  {seq:['⚡','🌊','⚡','🌊','⚡'],answer:'🌊',choices:['⚡','🌊','🔥','💨'],diff:'medium'},
+  {seq:['🎯','🎯','🎪','🎯','🎯'],answer:'🎪',choices:['🎯','🎪','🎨','🎭'],diff:'medium'},
+  {seq:['🌍','🌙','⭐','🌍','🌙'],answer:'⭐',choices:['🌍','🌙','⭐','☀️'],diff:'medium'},
+  {seq:['🔵','🟡','🔴','🔵','🟡'],answer:'🔴',choices:['🔵','🟡','🔴','🟢'],diff:'medium'},
+  {seq:['🐯','🐯','🦁','🐯','🐯'],answer:'🦁',choices:['🐯','🦁','🐆','🦓'],diff:'medium'},
+  {seq:['🎸','🥁','🎺','🎸','🥁'],answer:'🎺',choices:['🎸','🥁','🎺','🎻'],diff:'medium'},
+  {seq:['🌺','🍀','🌺','🍀','🌺'],answer:'🍀',choices:['🌺','🍀','🌸','🌼'],diff:'medium'},
+  {seq:['🚀','🛸','🌙','🚀','🛸'],answer:'🌙',choices:['🚀','🛸','🌙','⭐'],diff:'hard'},
+  {seq:['🦁','🐯','🦊','🐺','🦁'],answer:'🐯',choices:['🦁','🐯','🦊','🐺'],diff:'hard'},
+  {seq:['🍎','🍊','🍋','🍇','🍎'],answer:'🍊',choices:['🍎','🍊','🍋','🍇'],diff:'hard'},
+  {seq:['🔴','🟠','🟡','🟢','🔴'],answer:'🟠',choices:['🔴','🟠','🟡','🟢'],diff:'hard'},
+  {seq:['🌑','🌒','🌓','🌔','🌑'],answer:'🌒',choices:['🌑','🌒','🌓','🌔'],diff:'hard'},
+  {seq:['🎭','🎪','🎨','🎬','🎭'],answer:'🎪',choices:['🎭','🎪','🎨','🎬'],diff:'hard'},
+  {seq:['🦋','🐝','🐛','🦗','🦋'],answer:'🐝',choices:['🦋','🐝','🐛','🦗'],diff:'hard'},
+  {seq:['🏔️','🌋','🏕️','🏖️','🏔️'],answer:'🌋',choices:['🏔️','🌋','🏕️','🏖️'],diff:'hard'},
 ];
-let patternIdx=0,patternScore=0,patternAnswered=false;
+
+let patternQueue=[],patternIdx=0,patternScore=0,patternAnswered=false;
 
 function initPattern(){
   patternIdx=0;patternScore=0;patternAnswered=false;
+  patternQueue=[...allPatterns].sort(()=>Math.random()-0.5).slice(0,10);
   renderPattern();
 }
 
 function renderPattern(){
-  if(patternIdx>=patterns.length){
+  if(patternIdx>=patternQueue.length){
     gamesDone++;updateStats();
-    document.getElementById('pattern-content').innerHTML=`<div class="result-msg result-correct">🎉 Pattern session complete! You scored ${patternScore} / ${patterns.length * 10} points.</div><br><button class="game-btn" onclick="initPattern()">Play again</button>`;
+    document.getElementById('pattern-content').innerHTML=`<div class="result-msg result-correct">🎉 Pattern session complete! You scored ${patternScore} / ${patternQueue.length*10} points.</div><br><button class="game-btn" onclick="initPattern()">Play again</button>`;
     return;
   }
-  const p=patterns[patternIdx];
-  const pct=Math.round(patternIdx/patterns.length*100);
+  const p=patternQueue[patternIdx];
+  const pct=Math.round(patternIdx/patternQueue.length*100);
   document.getElementById('pattern-progress').style.width=pct+'%';
-  document.getElementById('pattern-progress-txt').textContent=`Question ${patternIdx+1} / ${patterns.length}`;
+  document.getElementById('pattern-progress-txt').textContent=`Question ${patternIdx+1} / ${patternQueue.length}`;
+  const diffClass=p.diff==='easy'?'diff-easy':p.diff==='medium'?'diff-medium':'diff-hard';
   const shuffled=[...p.choices].sort(()=>Math.random()-0.5);
   document.getElementById('pattern-content').innerHTML=`
-    <div style="margin-bottom:1rem;font-size:13px;font-weight:500;color:var(--ink2)">What comes next?</div>
-    <div class="pattern-display">${p.seq.map(e=>`<div class="pattern-item">${e}</div>`).join('')}<div class="pattern-item highlight" style="border-style:dashed;font-size:18px;color:var(--ink3)">?</div></div>
+    <div style="margin-bottom:1rem;font-size:13px;font-weight:500;color:var(--ink2)">What comes next? <span class="difficulty-badge ${diffClass}">${p.diff}</span></div>
+    <div class="pattern-display">${p.seq.map(e=>`<div class="pattern-item">${e}</div>`).join('')}<div class="pattern-item" style="border-style:dashed;font-size:18px;color:var(--ink3);border-color:#2563eb">?</div></div>
     <div class="pattern-choices">${shuffled.map(c=>`<div class="pattern-choice" onclick="checkPattern('${c}','${p.answer}')">${c}</div>`).join('')}</div>
     <div id="pattern-result"></div>`;
 }
@@ -260,8 +286,8 @@ function checkPattern(chosen,answer){
   setTimeout(()=>{patternIdx++;patternAnswered=false;renderPattern();},1200);
 }
 
-/* ===== OBJECT NAMING ===== */
-const objects=[
+/* ===== OBJECT NAMING — large bank of 40 objects, picks 10 random each round ===== */
+const allObjects=[
   {emoji:'🍎',name:'Apple',choices:['Apple','Orange','Pear','Mango']},
   {emoji:'🚗',name:'Car',choices:['Truck','Car','Bus','Bicycle']},
   {emoji:'📚',name:'Books',choices:['Newspaper','Magazine','Books','Notebook']},
@@ -274,25 +300,54 @@ const objects=[
   {emoji:'🧲',name:'Magnet',choices:['Battery','Magnet','Compass','Bolt']},
   {emoji:'🎩',name:'Hat',choices:['Hat','Scarf','Glove','Umbrella']},
   {emoji:'🍇',name:'Grapes',choices:['Grapes','Berries','Cherries','Plum']},
+  {emoji:'🚂',name:'Train',choices:['Train','Bus','Plane','Boat']},
+  {emoji:'🌍',name:'Globe',choices:['Globe','Map','Compass','Atlas']},
+  {emoji:'🎸',name:'Guitar',choices:['Guitar','Violin','Piano','Drum']},
+  {emoji:'🏠',name:'House',choices:['House','Apartment','Castle','Tent']},
+  {emoji:'🐘',name:'Elephant',choices:['Elephant','Hippo','Rhino','Giraffe']},
+  {emoji:'🌵',name:'Cactus',choices:['Cactus','Tree','Bush','Fern']},
+  {emoji:'🎭',name:'Theater mask',choices:['Theater mask','Crown','Trophy','Medal']},
+  {emoji:'🔭',name:'Telescope',choices:['Telescope','Microscope','Binoculars','Camera']},
+  {emoji:'🍕',name:'Pizza',choices:['Pizza','Burger','Sandwich','Taco']},
+  {emoji:'🎈',name:'Balloon',choices:['Balloon','Kite','Umbrella','Parachute']},
+  {emoji:'🦋',name:'Butterfly',choices:['Butterfly','Dragonfly','Bee','Moth']},
+  {emoji:'⚓',name:'Anchor',choices:['Anchor','Hook','Chain','Rope']},
+  {emoji:'🎯',name:'Target',choices:['Target','Shield','Medal','Trophy']},
+  {emoji:'🌂',name:'Umbrella',choices:['Umbrella','Parasol','Tent','Awning']},
+  {emoji:'🔬',name:'Microscope',choices:['Microscope','Telescope','Camera','Binoculars']},
+  {emoji:'🎻',name:'Violin',choices:['Violin','Guitar','Cello','Harp']},
+  {emoji:'🧩',name:'Puzzle piece',choices:['Puzzle piece','Tile','Block','Chip']},
+  {emoji:'🌡️',name:'Thermometer',choices:['Thermometer','Ruler','Gauge','Meter']},
+  {emoji:'🪑',name:'Chair',choices:['Chair','Table','Stool','Bench']},
+  {emoji:'🧪',name:'Test tube',choices:['Test tube','Bottle','Flask','Vial']},
+  {emoji:'🎺',name:'Trumpet',choices:['Trumpet','Horn','Flute','Trombone']},
+  {emoji:'🌊',name:'Wave',choices:['Wave','River','Lake','Pond']},
+  {emoji:'🦁',name:'Lion',choices:['Lion','Tiger','Cheetah','Leopard']},
+  {emoji:'🍓',name:'Strawberry',choices:['Strawberry','Raspberry','Cherry','Tomato']},
+  {emoji:'🎪',name:'Circus tent',choices:['Circus tent','Teepee','Igloo','Hut']},
+  {emoji:'🚀',name:'Rocket',choices:['Rocket','Missile','Satellite','Shuttle']},
+  {emoji:'🌻',name:'Sunflower',choices:['Sunflower','Daisy','Rose','Tulip']},
+  {emoji:'🎁',name:'Gift box',choices:['Gift box','Treasure chest','Basket','Bag']},
 ];
-let namingIdx=0,namingList=[],namingScore=0,namingAnswered=false;
+
+let namingQueue=[],namingIdx=0,namingScore=0,namingAnswered=false;
 
 function initNaming(){
   namingIdx=0;namingScore=0;namingAnswered=false;
-  namingList=[...objects].sort(()=>Math.random()-0.5).slice(0,10);
+  namingQueue=[...allObjects].sort(()=>Math.random()-0.5).slice(0,10);
   renderNaming();
 }
 
 function renderNaming(){
-  if(namingIdx>=namingList.length){
+  if(namingIdx>=namingQueue.length){
     gamesDone++;updateStats();
-    document.getElementById('naming-content').innerHTML=`<div class="result-msg result-correct">🎉 Naming session complete! You scored ${namingScore} / ${namingList.length * 10} points.</div><br><button class="game-btn" onclick="initNaming()">Play again</button>`;
+    document.getElementById('naming-content').innerHTML=`<div class="result-msg result-correct">🎉 Naming session complete! You scored ${namingScore} / ${namingQueue.length*10} points.</div><br><button class="game-btn" onclick="initNaming()">Play again</button>`;
     return;
   }
-  const obj=namingList[namingIdx];
-  const pct=Math.round(namingIdx/namingList.length*100);
+  const obj=namingQueue[namingIdx];
+  const pct=Math.round(namingIdx/namingQueue.length*100);
   document.getElementById('naming-progress').style.width=pct+'%';
-  document.getElementById('naming-progress-txt').textContent=`Question ${namingIdx+1} / ${namingList.length}`;
+  document.getElementById('naming-progress-txt').textContent=`Question ${namingIdx+1} / ${namingQueue.length}`;
   const shuffled=[...obj.choices].sort(()=>Math.random()-0.5);
   document.getElementById('naming-content').innerHTML=`
     <div class="object-display">${obj.emoji}</div>
@@ -310,7 +365,6 @@ function checkNaming(btn,chosen,answer){
   setTimeout(()=>{namingIdx++;namingAnswered=false;renderNaming();},1400);
 }
 
-// Init all games on load
 initMemory();
 initPattern();
 initNaming();
