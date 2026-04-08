@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Early Dementia Detection Assistant</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
@@ -20,7 +21,7 @@
     .field-row { display: flex; align-items: center; gap: 12px; }
     .field-row input[type=range] { flex: 1; }
     .field-val { font-size: 13px; font-weight: 600; min-width: 24px; text-align: right; color: #1a1a1a; }
-    .field input[type=number] { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
+    .field input[type=number], .field input[type=text] { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     select { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
     textarea { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; resize: vertical; font-family: system-ui, sans-serif; }
@@ -50,17 +51,16 @@
     .tag-danger { background: #fee2e2; color: #dc2626; }
     .tag-warning { background: #fef9c3; color: #b45309; }
     .tag-success { background: #dcfce7; color: #16a34a; }
-
-    /* Audio recorder styles */
+    /* Audio recorder */
     .recorder-area { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 1rem 0; }
     .record-btn { display: flex; align-items: center; gap: 8px; padding: 10px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
     .record-btn.idle { background: #1a1a1a; color: #fff; }
     .record-btn.idle:hover { background: #333; }
     .record-btn.recording { background: #dc2626; color: #fff; animation: pulse-red 1.2s infinite; }
-    @keyframes pulse-red { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); } 50% { box-shadow: 0 0 0 8px rgba(220,38,38,0); } }
+    @keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}50%{box-shadow:0 0 0 8px rgba(220,38,38,0);} }
     .record-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
     .record-dot.recording { animation: blink 1s infinite; }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.3;} }
     .record-timer { font-size: 13px; color: #888; font-variant-numeric: tabular-nums; }
     .waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 32px; }
     .waveform-bar { width: 3px; border-radius: 2px; background: #cbd5e1; transition: height 0.1s; }
@@ -74,7 +74,25 @@
     .extracted-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dcfce7; color: #16a34a; font-weight: 600; margin-bottom: 8px; }
     .divider { display: flex; align-items: center; gap: 10px; margin: 0.5rem 0; }
     .divider span { font-size: 11px; color: #bbb; white-space: nowrap; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e5e5; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:#e5e5e5; }
+    /* PDF + action */
+    .action-row { display: flex; gap: 10px; margin-top: 1rem; }
+    .pdf-btn { flex: 1; padding: 11px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #0f4c81; color: #fff; cursor: pointer; transition: opacity 0.15s; }
+    .pdf-btn:hover { opacity: 0.85; }
+    /* Trend */
+    .trend-wrap { position: relative; width: 100%; }
+    #trendChart { width: 100% !important; }
+    .trend-empty { font-size: 13px; color: #aaa; text-align: center; padding: 2rem 0; }
+    .session-list { margin-top: 0.75rem; }
+    .session-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .session-item:last-child { border-bottom: none; }
+    .session-date { color: #888; }
+    .session-risk { font-weight: 600; }
+    .session-risk.high { color: #dc2626; }
+    .session-risk.mid { color: #d97706; }
+    .session-risk.low { color: #16a34a; }
+    .clear-sessions { font-size: 11px; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 8px; }
+    .clear-sessions:hover { color: #666; }
   </style>
 </head>
 <body>
@@ -85,11 +103,36 @@
     <p>Record patient speech or enter cognitive assessment data to receive an AI-powered risk analysis.</p>
   </div>
 
-  <!-- Audio Recorder Card -->
+  <!-- Patient ID -->
+  <div class="card">
+    <div class="section-title">Patient identifier</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Patient ID / reference</label>
+        <input type="text" id="patient-id" placeholder="e.g. PT-00142" />
+      </div>
+      <div class="field">
+        <label>Clinician name</label>
+        <input type="text" id="clinician-name" placeholder="e.g. Dr. Sarah Mills" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Trend Chart -->
+  <div class="card">
+    <div class="section-title">Risk score trend</div>
+    <div class="trend-wrap">
+      <canvas id="trendChart" height="160"></canvas>
+      <div class="trend-empty" id="trend-empty">No sessions saved yet. Run an analysis to start tracking.</div>
+    </div>
+    <div class="session-list" id="session-list"></div>
+    <button class="clear-sessions" onclick="clearSessions()">Clear session history</button>
+  </div>
+
+  <!-- Audio Recorder -->
   <div class="card">
     <div class="section-title">Speech recording</div>
     <p style="font-size:13px;color:#666;margin-bottom:1rem;">Record the patient speaking for at least 10 seconds. Metrics will be auto-extracted from the audio.</p>
-
     <div class="recorder-area">
       <div class="waveform" id="waveform">
         <div class="waveform-bar" style="height:8px"></div>
@@ -105,30 +148,25 @@
         <div class="waveform-bar" style="height:10px"></div>
         <div class="waveform-bar" style="height:18px"></div>
       </div>
-
       <button class="record-btn idle" id="record-btn" onclick="toggleRecording()">
         <span class="record-dot" id="record-dot"></span>
         <span id="record-label">Start recording</span>
       </button>
       <span class="record-timer" id="record-timer" style="display:none">00:00</span>
     </div>
-
     <div id="audio-playback-area" style="display:none" class="audio-playback">
       <audio id="audio-player" controls></audio>
     </div>
-
     <div id="extract-area" style="display:none;margin-top:12px;">
-      <button class="extract-btn" id="extract-btn" onclick="extractMetrics()">
-        ✦ Auto-extract speech metrics
-      </button>
+      <button class="extract-btn" id="extract-btn" onclick="extractMetrics()">✦ Auto-extract speech metrics</button>
       <p class="extract-status" id="extract-status" style="display:none;margin-top:8px;"></p>
     </div>
-
     <div class="divider" style="margin-top:1rem;"><span>or enter metrics manually below</span></div>
   </div>
 
+  <!-- Speech Metrics -->
   <div class="card">
-    <div class="section-title" id="speech-section-title">Speech analysis metrics</div>
+    <div class="section-title">Speech analysis metrics</div>
     <div id="auto-filled-badge" style="display:none;margin-bottom:0.75rem;">
       <span class="extracted-badge">✓ Auto-filled from recording</span>
     </div>
@@ -151,6 +189,7 @@
     </div>
   </div>
 
+  <!-- Cognitive Indicators -->
   <div class="card">
     <div class="section-title">Cognitive &amp; linguistic indicators</div>
     <div class="field">
@@ -183,6 +222,7 @@
     </div>
   </div>
 
+  <!-- Patient Context -->
   <div class="card">
     <div class="section-title">Patient context (optional)</div>
     <div class="grid2">
@@ -212,219 +252,384 @@
 </div>
 
 <script>
-// ── Audio Recording ──────────────────────────────────────────────
-let mediaRecorder = null;
-let audioChunks = [];
-let recordingInterval = null;
-let recordingSeconds = 0;
-let audioBlob = null;
-let animFrame = null;
-let analyserNode = null;
-let waveformActive = false;
-
-function formatTime(s) {
-  const m = Math.floor(s / 60).toString().padStart(2, '0');
-  const sec = (s % 60).toString().padStart(2, '0');
-  return `${m}:${sec}`;
+// ── Session Storage ───────────────────────────────────────────────
+function getSessions() {
+  try { return JSON.parse(localStorage.getItem('dementia_sessions') || '[]'); } catch { return []; }
 }
+function saveSessions(s) { localStorage.setItem('dementia_sessions', JSON.stringify(s)); }
+function clearSessions() {
+  if (confirm('Clear all session history stored in this browser?')) {
+    localStorage.removeItem('dementia_sessions');
+    renderTrend();
+  }
+}
+function addSession(data) {
+  const sessions = getSessions();
+  sessions.push(data);
+  saveSessions(sessions);
+  renderTrend();
+}
+
+// ── Trend Chart (pure canvas, no lib) ────────────────────────────
+function renderTrend() {
+  const sessions = getSessions();
+  const empty = document.getElementById('trend-empty');
+  const canvas = document.getElementById('trendChart');
+  const list = document.getElementById('session-list');
+
+  if (sessions.length === 0) {
+    empty.style.display = 'block';
+    canvas.style.display = 'none';
+    list.innerHTML = '';
+    return;
+  }
+
+  empty.style.display = 'none';
+  canvas.style.display = 'block';
+
+  const dpr = window.devicePixelRatio || 1;
+  const displayW = canvas.parentElement.offsetWidth;
+  const displayH = 160;
+  canvas.width = displayW * dpr;
+  canvas.height = displayH * dpr;
+  canvas.style.width = displayW + 'px';
+  canvas.style.height = displayH + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 16, right: 16, bottom: 36, left: 40 };
+  const chartW = displayW - pad.left - pad.right;
+  const chartH = displayH - pad.top - pad.bottom;
+  const scores = sessions.map(s => s.risk);
+  const labels = sessions.map(s => s.date);
+
+  const xPos = i => pad.left + (scores.length === 1 ? chartW / 2 : i * chartW / (scores.length - 1));
+  const yPos = v => pad.top + chartH - (v / 100) * chartH;
+
+  // Grid + y-axis labels
+  [0, 30, 60, 100].forEach(v => {
+    const y = yPos(v);
+    ctx.beginPath();
+    ctx.strokeStyle = v === 60 ? '#fecaca' : v === 30 ? '#fde68a' : '#f0f0f0';
+    ctx.lineWidth = (v === 60 || v === 30) ? 1.5 : 1;
+    ctx.setLineDash((v === 60 || v === 30) ? [4, 3] : []);
+    ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText(v + '%', pad.left - 6, y + 4);
+  });
+
+  // Risk zone labels
+  ctx.fillStyle = '#fca5a5'; ctx.font = '9px system-ui'; ctx.textAlign = 'left';
+  ctx.fillText('High', pad.left + 2, yPos(80) + 3);
+  ctx.fillStyle = '#fcd34d';
+  ctx.fillText('Mod', pad.left + 2, yPos(45) + 3);
+  ctx.fillStyle = '#86efac';
+  ctx.fillText('Low', pad.left + 2, yPos(15) + 3);
+
+  // Line
+  if (scores.length > 1) {
+    ctx.beginPath();
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    scores.forEach((s, i) => i === 0 ? ctx.moveTo(xPos(i), yPos(s)) : ctx.lineTo(xPos(i), yPos(s)));
+    ctx.stroke();
+  }
+
+  // Points
+  scores.forEach((s, i) => {
+    const color = s >= 60 ? '#dc2626' : s >= 30 ? '#d97706' : '#16a34a';
+    ctx.beginPath();
+    ctx.arc(xPos(i), yPos(s), 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+
+    // Score label above point
+    ctx.fillStyle = color;
+    ctx.font = 'bold 10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(s + '%', xPos(i), yPos(s) - 9);
+  });
+
+  // X labels
+  ctx.fillStyle = '#aaa'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+  labels.forEach((l, i) => ctx.fillText(l, xPos(i), displayH - 6));
+
+  // Session list (most recent first)
+  list.innerHTML = sessions.slice().reverse().map(s => {
+    const lvl = s.risk >= 60 ? 'high' : s.risk >= 30 ? 'mid' : 'low';
+    return `<div class="session-item">
+      <span class="session-date">${s.date}${s.patientId ? ' · ' + s.patientId : ''}</span>
+      <span class="session-risk ${lvl}">${s.risk}% risk</span>
+    </div>`;
+  }).join('');
+}
+
+// ── PDF Export ────────────────────────────────────────────────────
+function exportPDF(session) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, m = 20, col = W - m * 2;
+  let y = 0;
+
+  // Header
+  doc.setFillColor(15, 76, 129);
+  doc.rect(0, 0, W, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.text('COGNITIVE RISK ASSESSMENT REPORT', m, 13);
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.text('Early Dementia Detection Assistant  ·  Clinical Decision Support', m, 20);
+  doc.text('Generated: ' + new Date().toLocaleString(), W - m, 20, { align: 'right' });
+
+  // Thin accent line
+  doc.setFillColor(100, 160, 220);
+  doc.rect(0, 30, W, 2, 'F');
+  y = 40;
+
+  // Patient info box
+  doc.setFillColor(245, 247, 250);
+  doc.setDrawColor(220, 225, 230);
+  doc.roundedRect(m, y, col, 26, 2, 2, 'FD');
+  const infoFields = [
+    ['PATIENT ID', session.patientId || '—', m + 4],
+    ['CLINICIAN', session.clinician || '—', m + 55],
+    ['ASSESSMENT DATE', session.date, m + 110],
+    ['AGE', String(session.age), m + 162],
+  ];
+  infoFields.forEach(([label, val, x]) => {
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(120, 130, 145);
+    doc.text(label, x, y + 8);
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
+    doc.text(val, x, y + 18);
+  });
+  y += 34;
+
+  // Risk block
+  const riskRGB = session.risk >= 60 ? [220,38,38] : session.risk >= 30 ? [217,119,6] : [22,163,74];
+  const riskLabel = session.risk >= 60 ? 'HIGH RISK' : session.risk >= 30 ? 'MODERATE RISK' : 'LOW RISK';
+  doc.setFillColor(...riskRGB);
+  doc.roundedRect(m, y, col, 20, 2, 2, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20); doc.setFont('helvetica', 'bold');
+  doc.text(session.risk + '%', m + 6, y + 13);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('Estimated Dementia Risk   ·   ' + riskLabel, m + 22, y + 13);
+  y += 26;
+
+  // Progress bar
+  doc.setFillColor(225, 225, 225);
+  doc.roundedRect(m, y, col, 4, 1, 1, 'F');
+  doc.setFillColor(...riskRGB);
+  doc.roundedRect(m, y, col * (session.risk / 100), 4, 1, 1, 'F');
+  y += 10;
+
+  // Section header helper
+  function sectionHeader(title) {
+    doc.setFillColor(237, 242, 247);
+    doc.rect(m, y, col, 7, 'F');
+    doc.setDrawColor(210, 218, 228);
+    doc.rect(m, y, col, 7, 'D');
+    doc.setTextColor(50, 80, 120);
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+    doc.text(title, m + 3, y + 5);
+    y += 9;
+  }
+
+  // Table row helper
+  function tableRow(label, val, rowIdx) {
+    doc.setFillColor(rowIdx % 2 === 0 ? 252 : 255, rowIdx % 2 === 0 ? 252 : 255, rowIdx % 2 === 0 ? 252 : 255);
+    doc.rect(m, y, col, 7, 'F');
+    doc.setDrawColor(240, 240, 240);
+    doc.line(m, y + 7, m + col, y + 7);
+    doc.setTextColor(100,100,100); doc.setFontSize(8.5); doc.setFont('helvetica', 'normal');
+    doc.text(label, m + 3, y + 5);
+    doc.setTextColor(20,20,20); doc.setFont('helvetica', 'bold');
+    doc.text(String(val), W - m - 3, y + 5, { align: 'right' });
+    y += 7;
+  }
+
+  // Speech metrics
+  sectionHeader('SPEECH ANALYSIS METRICS');
+  tableRow('Speech Duration', session.duration + 's', 0);
+  tableRow('Speech Segments', session.chunks, 1);
+  tableRow('Voice Clarity (MFCC composite)', session.mfcc, 2);
+  y += 4;
+
+  // Cognitive indicators
+  sectionHeader('COGNITIVE & LINGUISTIC INDICATORS');
+  tableRow('Word-finding Difficulty', session.wordFind + ' / 10', 0);
+  tableRow('Sentence Coherence', session.coherence + ' / 10', 1);
+  tableRow('Repetition Frequency', session.repeat + ' / 10', 2);
+  tableRow('Hesitation / Pause Rate', session.hesitation + ' / 10', 3);
+  tableRow('Memory Complaints Reported', session.memory.charAt(0).toUpperCase() + session.memory.slice(1), 4);
+  y += 4;
+
+  // AI assessment
+  sectionHeader('AI CLINICAL ASSESSMENT');
+  doc.setTextColor(25,25,25); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  const aiLines = doc.splitTextToSize(session.aiText || 'No AI assessment generated.', col - 4);
+  aiLines.forEach(line => {
+    if (y > H - 36) { doc.addPage(); y = 20; }
+    doc.text(line, m + 2, y);
+    y += 5;
+  });
+  y += 4;
+
+  // Clinician notes
+  if (session.notes) {
+    if (y > H - 36) { doc.addPage(); y = 20; }
+    sectionHeader('CLINICIAN OBSERVATIONS');
+    doc.setTextColor(25,25,25); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    const noteLines = doc.splitTextToSize(session.notes, col - 4);
+    noteLines.forEach(line => {
+      if (y > H - 36) { doc.addPage(); y = 20; }
+      doc.text(line, m + 2, y);
+      y += 5;
+    });
+  }
+
+  // Signature line
+  if (y < H - 50) {
+    y += 10;
+    doc.setDrawColor(180,180,180);
+    doc.line(m, y, m + 70, y);
+    doc.setFontSize(8); doc.setTextColor(150,150,150); doc.setFont('helvetica', 'normal');
+    doc.text('Clinician signature', m, y + 5);
+    doc.line(m + 100, y, m + 170, y);
+    doc.text('Date', m + 100, y + 5);
+  }
+
+  // Footer
+  doc.setFillColor(15, 76, 129);
+  doc.rect(0, H - 14, W, 14, 'F');
+  doc.setFillColor(100, 160, 220);
+  doc.rect(0, H - 14, W, 1.5, 'F');
+  doc.setTextColor(200, 215, 230); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+  doc.text('FOR RESEARCH & EDUCATIONAL USE ONLY · NOT A SUBSTITUTE FOR CLINICAL DIAGNOSIS · REVIEW ALL FINDINGS WITH A QUALIFIED PHYSICIAN', W/2, H - 7, { align: 'center' });
+
+  const pid = (session.patientId || 'patient').replace(/[^a-z0-9]/gi, '_');
+  doc.save(`cognitive_assessment_${pid}_${session.date.replace(/[\s/]/g, '-')}.pdf`);
+}
+
+// ── Audio Recording ───────────────────────────────────────────────
+let mediaRecorder = null, audioChunks = [], recordingInterval = null;
+let recordingSeconds = 0, audioBlob = null, animFrame = null, waveformActive = false;
+
+function formatTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
 
 function setWaveformActive(active) {
   waveformActive = active;
-  const bars = document.querySelectorAll('.waveform-bar');
-  bars.forEach(b => b.classList.toggle('active', active));
-  if (!active) {
-    bars.forEach(b => b.style.height = '8px');
-  }
+  document.querySelectorAll('.waveform-bar').forEach(b => { b.classList.toggle('active', active); if (!active) b.style.height = '8px'; });
 }
 
 function animateWaveform(analyser) {
   const bars = document.querySelectorAll('.waveform-bar');
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  const step = Math.floor(analyser.frequencyBinCount / bars.length);
   function draw() {
     if (!waveformActive) return;
     animFrame = requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(dataArray);
-    const step = Math.floor(bufferLength / bars.length);
-    bars.forEach((bar, i) => {
-      const val = dataArray[i * step] || 0;
-      const h = Math.max(4, Math.min(28, (val / 255) * 28));
-      bar.style.height = h + 'px';
-    });
+    analyser.getByteFrequencyData(data);
+    bars.forEach((b, i) => { b.style.height = Math.max(4, Math.min(28, (data[i*step]||0)/255*28)) + 'px'; });
   }
   draw();
 }
 
 async function toggleRecording() {
-  if (mediaRecorder && mediaRecorder.state === 'recording') {
-    stopRecording();
-  } else {
-    await startRecording();
-  }
+  if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
+  else await startRecording();
 }
 
 async function startRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioChunks = [];
-    recordingSeconds = 0;
-
-    // Set up analyser for waveform
+    audioChunks = []; recordingSeconds = 0;
     const audioCtx = new AudioContext();
     const source = audioCtx.createMediaStreamSource(stream);
-    analyserNode = audioCtx.createAnalyser();
-    analyserNode.fftSize = 256;
-    source.connect(analyserNode);
-
+    const analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+    source.connect(analyser);
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
     mediaRecorder.onstop = onRecordingStop;
     mediaRecorder.start(100);
-
-    // UI
-    const btn = document.getElementById('record-btn');
-    btn.className = 'record-btn recording';
+    document.getElementById('record-btn').className = 'record-btn recording';
     document.getElementById('record-label').textContent = 'Stop recording';
     document.getElementById('record-dot').classList.add('recording');
     document.getElementById('record-timer').style.display = 'inline';
     document.getElementById('record-timer').textContent = '00:00';
     document.getElementById('audio-playback-area').style.display = 'none';
     document.getElementById('extract-area').style.display = 'none';
-
-    setWaveformActive(true);
-    animateWaveform(analyserNode);
-
-    recordingInterval = setInterval(() => {
-      recordingSeconds++;
-      document.getElementById('record-timer').textContent = formatTime(recordingSeconds);
-    }, 1000);
-
-  } catch (err) {
-    alert('Microphone access denied. Please allow microphone access to use recording.');
-  }
+    setWaveformActive(true); animateWaveform(analyser);
+    recordingInterval = setInterval(() => { recordingSeconds++; document.getElementById('record-timer').textContent = formatTime(recordingSeconds); }, 1000);
+  } catch(e) { alert('Microphone access denied. Please allow microphone access to use this feature.'); }
 }
 
 function stopRecording() {
-  if (mediaRecorder) {
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-  }
-  clearInterval(recordingInterval);
-  setWaveformActive(false);
-  cancelAnimationFrame(animFrame);
-
-  const btn = document.getElementById('record-btn');
-  btn.className = 'record-btn idle';
+  if (mediaRecorder) { mediaRecorder.stop(); mediaRecorder.stream.getTracks().forEach(t => t.stop()); }
+  clearInterval(recordingInterval); setWaveformActive(false); cancelAnimationFrame(animFrame);
+  document.getElementById('record-btn').className = 'record-btn idle';
   document.getElementById('record-label').textContent = 'Record again';
   document.getElementById('record-dot').classList.remove('recording');
 }
 
 function onRecordingStop() {
   audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-  const url = URL.createObjectURL(audioBlob);
-  const player = document.getElementById('audio-player');
-  player.src = url;
+  document.getElementById('audio-player').src = URL.createObjectURL(audioBlob);
   document.getElementById('audio-playback-area').style.display = 'block';
   document.getElementById('extract-area').style.display = 'block';
-
-  // Auto-fill duration from recording
   document.getElementById('duration').value = recordingSeconds.toFixed(1);
 }
 
-// ── Metric Extraction via AI ─────────────────────────────────────
+// ── Metric Extraction ─────────────────────────────────────────────
 async function extractMetrics() {
   const btn = document.getElementById('extract-btn');
   const status = document.getElementById('extract-status');
-
   if (!audioBlob) return;
-
-  btn.disabled = true;
-  status.style.display = 'block';
-  status.textContent = '⏳ Transcribing and analysing speech...';
-
+  btn.disabled = true; status.style.display = 'block'; status.textContent = '⏳ Analysing speech patterns...';
   try {
-    // Convert blob to base64
-    const base64Audio = await blobToBase64(audioBlob);
-
-    const prompt = `You are a clinical speech analysis AI. A clinician has recorded a patient speaking for ${recordingSeconds} seconds.
-
-Based on the audio characteristics described below, estimate the following cognitive/speech metrics. Since you cannot directly process audio, use the duration and any patterns to give reasonable clinical estimates, and instruct the user to observe the transcript for specific indicators.
-
-However, I need you to return ONLY a JSON object (no explanation, no markdown) with these exact fields:
-{
-  "chunks": <integer 1-100, estimated speech segments>,
-  "mfcc": <float -3 to 3, voice clarity estimate>,
-  "wordFind": <integer 1-10, word-finding difficulty>,
-  "coherence": <integer 1-10, sentence coherence>,
-  "repeat": <integer 1-10, repetition frequency>,
-  "hesitation": <integer 1-10, hesitation/pause rate>,
-  "notes": "<string, one sentence of key observations for the clinician>"
-}
-
-Recording duration: ${recordingSeconds} seconds.
-Assume this is an elderly patient being asked to describe their morning routine or a recent event.
-Use moderate/average values as defaults unless the duration suggests very short or fragmented speech (under 8 seconds = higher hesitation/word-finding scores).`;
-
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    if (!res.ok) throw new Error('API error');
+    const prompt = `You are a clinical speech analysis AI. A clinician recorded a patient speaking for ${recordingSeconds} seconds. Return ONLY a JSON object, no explanation or markdown:
+{"chunks":<int 1-100>,"mfcc":<float -3 to 3>,"wordFind":<int 1-10>,"coherence":<int 1-10>,"repeat":<int 1-10>,"hesitation":<int 1-10>,"notes":"<one clinical observation sentence>"}
+Duration: ${recordingSeconds}s. Use moderate defaults. Under 8s = higher hesitation/word-finding scores.`;
+    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages:[{ role:'user', content: prompt }] }) });
+    if (!res.ok) throw new Error();
     const data = await res.json();
-    const text = data.choices?.[0]?.message?.content || '';
-
-    // Parse JSON from response
-    const clean = text.replace(/```json|```/g, '').trim();
-    const metrics = JSON.parse(clean);
-
-    // Apply to form
-    setSlider('word-find', 'wf-val', metrics.wordFind);
-    setSlider('coherence', 'coh-val', metrics.coherence);
-    setSlider('repeat', 'rep-val', metrics.repeat);
-    setSlider('hesitation', 'hes-val', metrics.hesitation);
-    setSlider('mfcc', 'mfcc-val', metrics.mfcc, true);
+    const metrics = JSON.parse((data.choices?.[0]?.message?.content || '{}').replace(/```json|```/g,'').trim());
+    setSlider('word-find','wf-val', metrics.wordFind);
+    setSlider('coherence','coh-val', metrics.coherence);
+    setSlider('repeat','rep-val', metrics.repeat);
+    setSlider('hesitation','hes-val', metrics.hesitation);
+    setSlider('mfcc','mfcc-val', metrics.mfcc, true);
     document.getElementById('chunks').value = metrics.chunks;
     if (metrics.notes) {
-      const existing = document.getElementById('notes').value;
-      document.getElementById('notes').value = existing
-        ? existing + '\n[Auto-extracted]: ' + metrics.notes
-        : '[Auto-extracted]: ' + metrics.notes;
+      const n = document.getElementById('notes');
+      n.value = n.value ? n.value + '\n[Auto]: ' + metrics.notes : '[Auto]: ' + metrics.notes;
     }
-
     document.getElementById('auto-filled-badge').style.display = 'block';
     status.textContent = '✓ Metrics extracted and applied.';
-    btn.textContent = '✓ Metrics extracted';
-
-  } catch (err) {
+    btn.textContent = '✓ Done';
+  } catch {
     status.textContent = '✗ Could not extract metrics. Please enter them manually.';
-    btn.disabled = false;
-    btn.textContent = '✦ Auto-extract speech metrics';
+    btn.disabled = false; btn.textContent = '✦ Auto-extract speech metrics';
   }
 }
 
-function setSlider(sliderId, valId, value, isFloat) {
-  const slider = document.getElementById(sliderId);
-  slider.value = value;
-  document.getElementById(valId).textContent = isFloat
-    ? parseFloat(value).toFixed(1)
-    : Math.round(value);
+function setSlider(sid, vid, val, isFloat) {
+  document.getElementById(sid).value = val;
+  document.getElementById(vid).textContent = isFloat ? parseFloat(val).toFixed(1) : Math.round(val);
 }
 
 function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
+  return new Promise((res, rej) => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
 }
 
-// ── Analysis ─────────────────────────────────────────────────────
+// ── Analysis ──────────────────────────────────────────────────────
+let lastSession = null;
+
 async function analyze() {
   const btn = document.getElementById('analyze-btn');
   const area = document.getElementById('result-area');
@@ -439,21 +644,16 @@ async function analyze() {
   const age = parseInt(document.getElementById('age').value);
   const memory = document.getElementById('memory').value;
   const notes = document.getElementById('notes').value;
+  const patientId = document.getElementById('patient-id').value.trim();
+  const clinician = document.getElementById('clinician-name').value.trim();
 
   let risk = 0;
-  if (wordFind >= 7) risk += 25;
-  else if (wordFind >= 5) risk += 12;
-  if (coherence <= 4) risk += 25;
-  else if (coherence <= 6) risk += 10;
-  if (repeat >= 7) risk += 20;
-  else if (repeat >= 5) risk += 10;
-  if (hesitation >= 7) risk += 15;
-  else if (hesitation >= 5) risk += 7;
-  if (age >= 80) risk += 10;
-  else if (age >= 70) risk += 5;
-  if (memory === 'severe') risk += 15;
-  else if (memory === 'moderate') risk += 8;
-  else if (memory === 'mild') risk += 3;
+  if (wordFind >= 7) risk += 25; else if (wordFind >= 5) risk += 12;
+  if (coherence <= 4) risk += 25; else if (coherence <= 6) risk += 10;
+  if (repeat >= 7) risk += 20; else if (repeat >= 5) risk += 10;
+  if (hesitation >= 7) risk += 15; else if (hesitation >= 5) risk += 7;
+  if (age >= 80) risk += 10; else if (age >= 70) risk += 5;
+  if (memory === 'severe') risk += 15; else if (memory === 'moderate') risk += 8; else if (memory === 'mild') risk += 3;
   if (chunks < 10) risk += 5;
   if (duration < 5) risk += 5;
   risk = Math.min(risk, 98);
@@ -463,15 +663,15 @@ async function analyze() {
   const levelLabel = level === 'high' ? 'High risk' : level === 'mid' ? 'Moderate risk' : 'Low risk';
 
   const redFlags = [];
-  if (wordFind >= 7) redFlags.push({text: 'Severe word-finding difficulty', level: 'danger'});
-  if (coherence <= 4) redFlags.push({text: 'Poor sentence coherence', level: 'danger'});
-  if (repeat >= 7) redFlags.push({text: 'Frequent repetition', level: 'danger'});
-  if (hesitation >= 7) redFlags.push({text: 'High hesitation rate', level: 'danger'});
-  if (wordFind >= 5 && wordFind < 7) redFlags.push({text: 'Moderate word-finding difficulty', level: 'warning'});
-  if (coherence > 4 && coherence <= 6) redFlags.push({text: 'Reduced sentence coherence', level: 'warning'});
-  if (repeat >= 5 && repeat < 7) redFlags.push({text: 'Some repetitive speech', level: 'warning'});
-  if (memory === 'severe') redFlags.push({text: 'Severe memory complaints', level: 'danger'});
-  else if (memory === 'moderate') redFlags.push({text: 'Moderate memory complaints', level: 'warning'});
+  if (wordFind >= 7) redFlags.push({text:'Severe word-finding difficulty',level:'danger'});
+  if (coherence <= 4) redFlags.push({text:'Poor sentence coherence',level:'danger'});
+  if (repeat >= 7) redFlags.push({text:'Frequent repetition',level:'danger'});
+  if (hesitation >= 7) redFlags.push({text:'High hesitation rate',level:'danger'});
+  if (wordFind >= 5 && wordFind < 7) redFlags.push({text:'Moderate word-finding difficulty',level:'warning'});
+  if (coherence > 4 && coherence <= 6) redFlags.push({text:'Reduced sentence coherence',level:'warning'});
+  if (repeat >= 5 && repeat < 7) redFlags.push({text:'Some repetitive speech',level:'warning'});
+  if (memory === 'severe') redFlags.push({text:'Severe memory complaints',level:'danger'});
+  else if (memory === 'moderate') redFlags.push({text:'Moderate memory complaints',level:'warning'});
 
   area.innerHTML = `
     <div class="result-card result-${level}">
@@ -479,7 +679,7 @@ async function analyze() {
       <div class="result-sub">Based on speech and cognitive indicators</div>
       <div class="score-bar-wrap"><div class="score-bar" id="score-bar" style="width:0%;background:${barColor}"></div></div>
       <div style="margin-bottom:0.75rem;">
-        ${redFlags.length > 0 ? redFlags.map(f => `<span class="tag tag-${f.level}">${f.text}</span>`).join('') : '<span class="tag tag-success">No significant red flags detected</span>'}
+        ${redFlags.length > 0 ? redFlags.map(f=>`<span class="tag tag-${f.level}">${f.text}</span>`).join('') : '<span class="tag tag-success">No significant red flags detected</span>'}
       </div>
       <div>
         <div class="metric-row"><span class="metric-label">Speech duration</span><span class="metric-val">${duration.toFixed(1)}s</span></div>
@@ -492,15 +692,13 @@ async function analyze() {
       <div class="section-title">AI clinical analysis</div>
       <div class="ai-response" id="ai-text"><span class="spinner"></span> Generating clinical assessment...</div>
     </div>
+    <div class="action-row" id="action-row" style="display:none">
+      <button class="pdf-btn" onclick="exportPDF(lastSession)">⬇ Export PDF Report</button>
+    </div>
   `;
 
-  setTimeout(() => {
-    const bar = document.getElementById('score-bar');
-    if (bar) bar.style.width = risk + '%';
-  }, 100);
-
-  btn.disabled = true;
-  btn.textContent = 'Analyzing...';
+  setTimeout(() => { const b = document.getElementById('score-bar'); if(b) b.style.width = risk+'%'; }, 100);
+  btn.disabled = true; btn.textContent = 'Analyzing...';
 
   const prompt = `You are a clinical AI assistant helping doctors assess early signs of dementia based on patient speech and cognitive data.
 
@@ -525,30 +723,32 @@ Write a concise clinical assessment (3-4 short paragraphs) for the doctor. Cover
 Be clinical, clear, and direct. Do not use bullet points. End with a brief note about the limitations of AI-based screening.`;
 
   try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
+    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages:[{role:'user', content: prompt}] }) });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
+      const err = await res.json().catch(()=>({}));
       document.getElementById('ai-text').textContent = `Error: ${err.error || res.status}`;
       return;
     }
-
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || 'Unable to generate analysis.';
     document.getElementById('ai-text').textContent = text;
+
+    // Save session & show PDF button
+    const dateStr = new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+    lastSession = { patientId, clinician, date: dateStr, age, risk, duration: duration.toFixed(1), chunks, mfcc: mfcc.toFixed(1), wordFind, coherence, repeat, hesitation, memory, notes, aiText: text };
+    addSession({ patientId, date: dateStr, risk });
+    document.getElementById('action-row').style.display = 'flex';
+
   } catch(e) {
     document.getElementById('ai-text').textContent = 'Error connecting to AI. Please try again.';
   }
 
-  btn.disabled = false;
-  btn.textContent = 'Analyze patient →';
+  btn.disabled = false; btn.textContent = 'Analyze patient →';
 }
+
+// Init
+renderTrend();
+window.addEventListener('resize', renderTrend);
 </script>
 </body>
 </html>
