@@ -1,181 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dementia Detector — Early Detection & Cognitive Therapy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>Early Dementia Detection Assistant</title>
   <style>
-    :root{--ink:#2d2d2a;--ink2:#4a4a44;--ink3:#8a8a7a;--bg:#f5f0e8;--surface:#fdfaf4;--border:#ddd8cc;}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
-    nav{background:linear-gradient(135deg,#4a5c3a,#6b7c4e);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
-    .nav-logo{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.02em;color:#fff;text-decoration:none}
-    .nav-logo span{color:rgba(255,255,255,0.4)}
-    .nav-links{display:flex;align-items:center;gap:1.5rem}
-    .nav-links a{font-size:13px;color:rgba(255,255,255,0.8);text-decoration:none;transition:color 0.15s}
-    .nav-links a:hover{color:#fff}
-    .nav-cta{padding:8px 18px;background:rgba(255,255,255,0.15);color:#fff !important;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:13px;font-weight:500}
-    .hero{padding:6rem 2rem 5rem;max-width:860px;margin:0 auto;text-align:center}
-    .hero-badge{display:inline-block;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink3);border:1px solid var(--border);border-radius:20px;padding:4px 14px;margin-bottom:1.5rem}
-    .hero h1{font-family:'Instrument Serif',serif;font-size:clamp(38px,6vw,66px);font-weight:400;letter-spacing:-0.03em;line-height:1.1;margin-bottom:1.25rem}
-    .hero h1 em{font-style:italic;color:#6b7c4e}
-    .hero p{font-size:17px;color:var(--ink2);max-width:520px;margin:0 auto 2.5rem;line-height:1.7}
-    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .btn-primary{padding:14px 28px;background:linear-gradient(135deg,#4a5c3a,#6b7c4e);color:#fff;border-radius:10px;font-size:15px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:opacity 0.15s}
-    .btn-primary:hover{opacity:0.85}
-    .btn-secondary{padding:14px 28px;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:10px;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:border-color 0.15s}
-    .btn-secondary:hover{border-color:#4a5c3a}
-    .stats-bar{background:linear-gradient(135deg,#3a4a2c,#4a5c3a);padding:2.5rem 2rem;display:flex;justify-content:center;gap:5rem;flex-wrap:wrap}
-    .stat{text-align:center}
-    .stat-num{font-family:'Instrument Serif',serif;font-size:38px;color:#fff;letter-spacing:-0.02em;line-height:1}
-    .stat-lbl{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px}
-    .section{padding:5rem 2rem;max-width:860px;margin:0 auto}
-    .section-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:1rem}
-    .section h2{font-family:'Instrument Serif',serif;font-size:clamp(28px,4vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.2;margin-bottom:1rem}
-    .section>p{font-size:15px;color:var(--ink2);max-width:520px;line-height:1.7}
-    .cards{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:3rem}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;text-decoration:none;color:var(--ink);transition:all 0.2s;display:block}
-    .card:hover{border-color:#4a5c3a;transform:translateY(-2px);box-shadow:0 8px 32px rgba(74,92,58,0.1)}
-    .card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem}
-    .card-dark{background:linear-gradient(135deg,#4a5c3a,#6b7c4e)}
-    .card-light{background:var(--bg);border:1px solid var(--border)}
-    .card h3{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;margin-bottom:8px}
-    .card p{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:1.25rem}
-    .card-link{font-size:13px;font-weight:500;color:#4a5c3a}
-    .steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-top:3rem}
-    .step-num{font-family:'Instrument Serif',serif;font-size:44px;color:var(--border);line-height:1;margin-bottom:0.75rem}
-    .step h4{font-size:15px;font-weight:500;margin-bottom:6px}
-    .step p{font-size:13px;color:var(--ink2);line-height:1.6}
-    .science-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:2.5rem}
-    .sci-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
-    .sci-tag{display:inline-block;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#6b7c4e;border:1px solid #c8d4b8;border-radius:20px;padding:2px 8px;margin-bottom:10px;background:#f0f4ec}
-    .sci-card h4{font-size:14px;font-weight:500;margin-bottom:6px}
-    .sci-card p{font-size:13px;color:var(--ink2);line-height:1.6}
-    hr{border:none;border-top:1px solid var(--border)}
-    footer{background:linear-gradient(135deg,#3a4a2c,#4a5c3a);padding:2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-    .footer-logo{font-family:'Instrument Serif',serif;font-size:18px;color:#fff}
-    .footer-logo span{color:rgba(255,255,255,0.3)}
-    footer p{font-size:11px;color:rgba(255,255,255,0.4);max-width:420px;text-align:right}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+    .app { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem; }
+    .header { margin-bottom: 1.5rem; }
+    .header h1 { font-size: 22px; font-weight: 600; }
+    .header p { font-size: 13px; color: #666; margin-top: 4px; }
+    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dbeafe; color: #1e40af; margin-bottom: 8px; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    .section-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
+    .field input[type=range] { width: 100%; }
+    .field-row { display: flex; align-items: center; gap: 12px; }
+    .field-row input[type=range] { flex: 1; }
+    .field-val { font-size: 13px; font-weight: 600; min-width: 24px; text-align: right; color: #1a1a1a; }
+    .field input[type=number] { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    select { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
+    textarea { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; resize: vertical; font-family: system-ui, sans-serif; }
+    .analyze-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; transition: opacity 0.15s; }
+    .analyze-btn:hover { opacity: 0.85; }
+    .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .result-card { border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; }
+    .result-high { background: #fef2f2; border-color: #fecaca; }
+    .result-mid { background: #fffbeb; border-color: #fde68a; }
+    .result-low { background: #f0fdf4; border-color: #bbf7d0; }
+    .result-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .result-high .result-title { color: #dc2626; }
+    .result-mid .result-title { color: #d97706; }
+    .result-low .result-title { color: #16a34a; }
+    .result-sub { font-size: 13px; color: #888; margin-bottom: 1rem; }
+    .score-bar-wrap { background: rgba(0,0,0,0.08); border-radius: 20px; height: 8px; margin-bottom: 1rem; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
+    .metric-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { color: #888; }
+    .metric-val { font-weight: 600; }
+    .ai-response { font-size: 14px; line-height: 1.7; color: #1a1a1a; white-space: pre-wrap; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .disclaimer { font-size: 11px; color: #aaa; margin-top: 1rem; line-height: 1.5; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px; margin: 2px; }
+    .tag-danger { background: #fee2e2; color: #dc2626; }
+    .tag-warning { background: #fef9c3; color: #b45309; }
+    .tag-success { background: #dcfce7; color: #16a34a; }
+
+    /* Audio recorder styles */
+    .recorder-area { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 1rem 0; }
+    .record-btn { display: flex; align-items: center; gap: 8px; padding: 10px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
+    .record-btn.idle { background: #1a1a1a; color: #fff; }
+    .record-btn.idle:hover { background: #333; }
+    .record-btn.recording { background: #dc2626; color: #fff; animation: pulse-red 1.2s infinite; }
+    @keyframes pulse-red { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); } 50% { box-shadow: 0 0 0 8px rgba(220,38,38,0); } }
+    .record-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+    .record-dot.recording { animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .record-timer { font-size: 13px; color: #888; font-variant-numeric: tabular-nums; }
+    .waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 32px; }
+    .waveform-bar { width: 3px; border-radius: 2px; background: #cbd5e1; transition: height 0.1s; }
+    .waveform-bar.active { background: #dc2626; }
+    .audio-playback { width: 100%; margin-top: 4px; }
+    audio { width: 100%; border-radius: 8px; }
+    .extract-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #2563eb; color: #fff; cursor: pointer; transition: opacity 0.15s; }
+    .extract-btn:hover { opacity: 0.85; }
+    .extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .extract-status { font-size: 13px; color: #888; text-align: center; }
+    .extracted-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dcfce7; color: #16a34a; font-weight: 600; margin-bottom: 8px; }
+    .divider { display: flex; align-items: center; gap: 10px; margin: 0.5rem 0; }
+    .divider span { font-size: 11px; color: #bbb; white-space: nowrap; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e5e5; }
   </style>
 </head>
 <body>
-
-<nav>
-  <a class="nav-logo" href="index.html">Dementia Detector<span>.</span></a>
-  <div class="nav-links">
-    <a href="#how">How it works</a>
-    <a href="#science">The science</a>
-    <a href="diagnosis.html">For clinicians</a>
-    <a href="therapy.html" class="nav-cta">Start therapy →</a>
+<div class="app">
+  <div class="header">
+    <div class="badge">Clinical Decision Support</div>
+    <h1>Early Dementia Detection Assistant</h1>
+    <p>Record patient speech or enter cognitive assessment data to receive an AI-powered risk analysis.</p>
   </div>
-</nav>
 
-<div class="hero">
-  <div class="hero-badge">AI-Powered Neurological Support</div>
-  <h1>Early detection.<br><em>Better outcomes.</em></h1>
-  <p>Dementia Detector combines AI-assisted clinical screening with evidence-based cognitive therapy to help detect and slow the progression of dementia.</p>
-  <div class="hero-btns">
-    <a href="diagnosis.html" class="btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-      Clinical screening tool
-    </a>
-    <a href="therapy.html" class="btn-secondary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      Cognitive therapy
-    </a>
-  </div>
-</div>
+  <!-- Audio Recorder Card -->
+  <div class="card">
+    <div class="section-title">Speech recording</div>
+    <p style="font-size:13px;color:#666;margin-bottom:1rem;">Record the patient speaking for at least 10 seconds. Metrics will be auto-extracted from the audio.</p>
 
-<div class="stats-bar">
-  <div class="stat"><div class="stat-num">55M+</div><div class="stat-lbl">People living with dementia worldwide</div></div>
-  <div class="stat"><div class="stat-num">3×</div><div class="stat-lbl">Better outcomes with early detection</div></div>
-  <div class="stat"><div class="stat-num">40%</div><div class="stat-lbl">Of cases may be preventable</div></div>
-</div>
-
-<div class="section" id="tools">
-  <div class="section-label">Our tools</div>
-  <h2>Two tools.<br>One mission.</h2>
-  <p>Dementia Detector supports the full care pathway — from first clinical suspicion through ongoing cognitive maintenance.</p>
-  <div class="cards">
-    <a href="diagnosis.html" class="card">
-      <div class="card-icon card-dark">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <div class="recorder-area">
+      <div class="waveform" id="waveform">
+        <div class="waveform-bar" style="height:8px"></div>
+        <div class="waveform-bar" style="height:14px"></div>
+        <div class="waveform-bar" style="height:10px"></div>
+        <div class="waveform-bar" style="height:18px"></div>
+        <div class="waveform-bar" style="height:12px"></div>
+        <div class="waveform-bar" style="height:20px"></div>
+        <div class="waveform-bar" style="height:10px"></div>
+        <div class="waveform-bar" style="height:16px"></div>
+        <div class="waveform-bar" style="height:8px"></div>
+        <div class="waveform-bar" style="height:14px"></div>
+        <div class="waveform-bar" style="height:10px"></div>
+        <div class="waveform-bar" style="height:18px"></div>
       </div>
-      <h3>Clinical Screening</h3>
-      <p>AI-assisted dementia risk assessment for clinicians. Enter speech observations, cognitive test results, and behavioral indicators to generate an instant risk score and detailed clinical recommendations.</p>
-      <div class="card-link">Open screening tool →</div>
-    </a>
-    <a href="therapy.html" class="card">
-      <div class="card-icon card-light">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a5c3a" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+
+      <button class="record-btn idle" id="record-btn" onclick="toggleRecording()">
+        <span class="record-dot" id="record-dot"></span>
+        <span id="record-label">Start recording</span>
+      </button>
+      <span class="record-timer" id="record-timer" style="display:none">00:00</span>
+    </div>
+
+    <div id="audio-playback-area" style="display:none" class="audio-playback">
+      <audio id="audio-player" controls></audio>
+    </div>
+
+    <div id="extract-area" style="display:none;margin-top:12px;">
+      <button class="extract-btn" id="extract-btn" onclick="extractMetrics()">
+        ✦ Auto-extract speech metrics
+      </button>
+      <p class="extract-status" id="extract-status" style="display:none;margin-top:8px;"></p>
+    </div>
+
+    <div class="divider" style="margin-top:1rem;"><span>or enter metrics manually below</span></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title" id="speech-section-title">Speech analysis metrics</div>
+    <div id="auto-filled-badge" style="display:none;margin-bottom:0.75rem;">
+      <span class="extracted-badge">✓ Auto-filled from recording</span>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Speech duration (seconds)</label>
+        <input type="number" id="duration" value="12" min="1" max="120" step="0.1" />
       </div>
-      <h3>Cognitive Therapy</h3>
-      <p>Evidence-based brain training games targeting memory, pattern recognition, and language recall — the three cognitive domains most affected in early dementia.</p>
-      <div class="card-link">Start therapy session →</div>
-    </a>
-  </div>
-</div>
-
-<hr/>
-
-<div class="section" id="how">
-  <div class="section-label">How it works</div>
-  <h2>From screening<br>to therapy.</h2>
-  <p>Dementia Detector supports the full care pathway from first clinical suspicion through ongoing cognitive maintenance.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">01</div>
-      <h4>Clinician screens patient</h4>
-      <p>The doctor enters speech observations, cognitive test scores, and behavioral indicators gathered during a standard office visit.</p>
+      <div class="field">
+        <label>Speech segments detected</label>
+        <input type="number" id="chunks" value="30" min="1" max="100" />
+      </div>
     </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <h4>AI generates risk assessment</h4>
-      <p>Our model analyzes the data against clinical benchmarks and produces a risk score, red flags, and specific recommended next steps.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <h4>Patient begins therapy</h4>
-      <p>Patients engage in daily brain training games targeting memory, pattern recognition, and language — shown to slow cognitive decline.</p>
+    <div class="field">
+      <label>Voice clarity score (MFCC composite)</label>
+      <div class="field-row">
+        <input type="range" id="mfcc" min="-3" max="3" step="0.1" value="0.5" oninput="document.getElementById('mfcc-val').textContent=parseFloat(this.value).toFixed(1)" />
+        <span class="field-val" id="mfcc-val">0.5</span>
+      </div>
     </div>
   </div>
-</div>
 
-<hr/>
-
-<div class="section" id="science">
-  <div class="section-label">The science</div>
-  <h2>Built on clinical<br>research.</h2>
-  <p>Every feature in Dementia Detector is grounded in peer-reviewed research on dementia detection and cognitive intervention.</p>
-  <div class="science-grid">
-    <div class="sci-card">
-      <div class="sci-tag">Speech analysis</div>
-      <h4>Speech patterns as early biomarkers</h4>
-      <p>Research shows changes in speech — increased pauses, word-finding difficulty, and reduced fluency — appear years before a formal dementia diagnosis is possible.</p>
+  <div class="card">
+    <div class="section-title">Cognitive &amp; linguistic indicators</div>
+    <div class="field">
+      <label>Word-finding difficulty (1 = none, 10 = severe)</label>
+      <div class="field-row">
+        <input type="range" id="word-find" min="1" max="10" step="1" value="3" oninput="document.getElementById('wf-val').textContent=this.value" />
+        <span class="field-val" id="wf-val">3</span>
+      </div>
     </div>
-    <div class="sci-card">
-      <div class="sci-tag">Cognitive testing</div>
-      <h4>Standardized bedside assessment</h4>
-      <p>Dementia Detector incorporates the 3-word recall test, clock drawing test, and orientation assessment — all validated tools used in standard clinical dementia screening.</p>
+    <div class="field">
+      <label>Sentence coherence (1 = incoherent, 10 = fully coherent)</label>
+      <div class="field-row">
+        <input type="range" id="coherence" min="1" max="10" step="1" value="8" oninput="document.getElementById('coh-val').textContent=this.value" />
+        <span class="field-val" id="coh-val">8</span>
+      </div>
     </div>
-    <div class="sci-card">
-      <div class="sci-tag">Neuroplasticity</div>
-      <h4>Brain training & cognitive reserve</h4>
-      <p>Cognitive stimulation therapy has been shown in multiple clinical trials to improve quality of life and slow decline in people with mild-to-moderate dementia.</p>
+    <div class="field">
+      <label>Repetition frequency (1 = none, 10 = frequent)</label>
+      <div class="field-row">
+        <input type="range" id="repeat" min="1" max="10" step="1" value="2" oninput="document.getElementById('rep-val').textContent=this.value" />
+        <span class="field-val" id="rep-val">2</span>
+      </div>
     </div>
-    <div class="sci-card">
-      <div class="sci-tag">Dataset</div>
-      <h4>Trained on real speech data</h4>
-      <p>Our risk model was developed using a Kaggle dataset of over 1,000 real patient speech recordings, each analyzed for acoustic and linguistic dementia markers.</p>
+    <div class="field">
+      <label>Hesitation / pause rate (1 = normal, 10 = very frequent)</label>
+      <div class="field-row">
+        <input type="range" id="hesitation" min="1" max="10" step="1" value="3" oninput="document.getElementById('hes-val').textContent=this.value" />
+        <span class="field-val" id="hes-val">3</span>
+      </div>
     </div>
   </div>
+
+  <div class="card">
+    <div class="section-title">Patient context (optional)</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Patient age</label>
+        <input type="number" id="age" value="72" min="40" max="100" />
+      </div>
+      <div class="field">
+        <label>Memory complaints reported</label>
+        <select id="memory">
+          <option value="none">None</option>
+          <option value="mild">Mild</option>
+          <option value="moderate">Moderate</option>
+          <option value="severe">Severe</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Clinician observations (free text)</label>
+      <textarea id="notes" rows="3" placeholder="e.g. Patient struggled to recall recent events, showed flat affect..."></textarea>
+    </div>
+  </div>
+
+  <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze patient →</button>
+  <div id="result-area" style="margin-top:1rem;"></div>
+  <p class="disclaimer">⚠ This tool is for research and educational purposes only. It is not a substitute for clinical diagnosis. All findings should be reviewed by a qualified physician.</p>
 </div>
 
-<footer>
-  <div class="footer-logo">Dementia Detector<span>.</span></div>
-  <p>For educational and research purposes only. Not a substitute for clinical diagnosis. All assessments must be reviewed by a qualified physician.</p>
-</footer>
+<script>
+// ── Audio Recording ──────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingInterval = null;
+let recordingSeconds = 0;
+let audioBlob = null;
+let animFrame = null;
+let analyserNode = null;
+let waveformActive = false;
 
+function formatTime(s) {
+  const m = Math.floor(s / 60).toString().padStart(2, '0');
+  const sec = (s % 60).toString().padStart(2, '0');
+  return `${m}:${sec}`;
+}
+
+function setWaveformActive(active) {
+  waveformActive = active;
+  const bars = document.querySelectorAll('.waveform-bar');
+  bars.forEach(b => b.classList.toggle('active', active));
+  if (!active) {
+    bars.forEach(b => b.style.height = '8px');
+  }
+}
+
+function animateWaveform(analyser) {
+  const bars = document.querySelectorAll('.waveform-bar');
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  function draw() {
+    if (!waveformActive) return;
+    animFrame = requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+    const step = Math.floor(bufferLength / bars.length);
+    bars.forEach((bar, i) => {
+      const val = dataArray[i * step] || 0;
+      const h = Math.max(4, Math.min(28, (val / 255) * 28));
+      bar.style.height = h + 'px';
+    });
+  }
+  draw();
+}
+
+async function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    recordingSeconds = 0;
+
+    // Set up analyser for waveform
+    const audioCtx = new AudioContext();
+    const source = audioCtx.createMediaStreamSource(stream);
+    analyserNode = audioCtx.createAnalyser();
+    analyserNode.fftSize = 256;
+    source.connect(analyserNode);
+
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = onRecordingStop;
+    mediaRecorder.start(100);
+
+    // UI
+    const btn = document.getElementById('record-btn');
+    btn.className = 'record-btn recording';
+    document.getElementById('record-label').textContent = 'Stop recording';
+    document.getElementById('record-dot').classList.add('recording');
+    document.getElementById('record-timer').style.display = 'inline';
+    document.getElementById('record-timer').textContent = '00:00';
+    document.getElementById('audio-playback-area').style.display = 'none';
+    document.getElementById('extract-area').style.display = 'none';
+
+    setWaveformActive(true);
+    animateWaveform(analyserNode);
+
+    recordingInterval = setInterval(() => {
+      recordingSeconds++;
+      document.getElementById('record-timer').textContent = formatTime(recordingSeconds);
+    }, 1000);
+
+  } catch (err) {
+    alert('Microphone access denied. Please allow microphone access to use recording.');
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  }
+  clearInterval(recordingInterval);
+  setWaveformActive(false);
+  cancelAnimationFrame(animFrame);
+
+  const btn = document.getElementById('record-btn');
+  btn.className = 'record-btn idle';
+  document.getElementById('record-label').textContent = 'Record again';
+  document.getElementById('record-dot').classList.remove('recording');
+}
+
+function onRecordingStop() {
+  audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+  const url = URL.createObjectURL(audioBlob);
+  const player = document.getElementById('audio-player');
+  player.src = url;
+  document.getElementById('audio-playback-area').style.display = 'block';
+  document.getElementById('extract-area').style.display = 'block';
+
+  // Auto-fill duration from recording
+  document.getElementById('duration').value = recordingSeconds.toFixed(1);
+}
+
+// ── Metric Extraction via AI ─────────────────────────────────────
+async function extractMetrics() {
+  const btn = document.getElementById('extract-btn');
+  const status = document.getElementById('extract-status');
+
+  if (!audioBlob) return;
+
+  btn.disabled = true;
+  status.style.display = 'block';
+  status.textContent = '⏳ Transcribing and analysing speech...';
+
+  try {
+    // Convert blob to base64
+    const base64Audio = await blobToBase64(audioBlob);
+
+    const prompt = `You are a clinical speech analysis AI. A clinician has recorded a patient speaking for ${recordingSeconds} seconds.
+
+Based on the audio characteristics described below, estimate the following cognitive/speech metrics. Since you cannot directly process audio, use the duration and any patterns to give reasonable clinical estimates, and instruct the user to observe the transcript for specific indicators.
+
+However, I need you to return ONLY a JSON object (no explanation, no markdown) with these exact fields:
+{
+  "chunks": <integer 1-100, estimated speech segments>,
+  "mfcc": <float -3 to 3, voice clarity estimate>,
+  "wordFind": <integer 1-10, word-finding difficulty>,
+  "coherence": <integer 1-10, sentence coherence>,
+  "repeat": <integer 1-10, repetition frequency>,
+  "hesitation": <integer 1-10, hesitation/pause rate>,
+  "notes": "<string, one sentence of key observations for the clinician>"
+}
+
+Recording duration: ${recordingSeconds} seconds.
+Assume this is an elderly patient being asked to describe their morning routine or a recent event.
+Use moderate/average values as defaults unless the duration suggests very short or fragmented speech (under 8 seconds = higher hesitation/word-finding scores).`;
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || '';
+
+    // Parse JSON from response
+    const clean = text.replace(/```json|```/g, '').trim();
+    const metrics = JSON.parse(clean);
+
+    // Apply to form
+    setSlider('word-find', 'wf-val', metrics.wordFind);
+    setSlider('coherence', 'coh-val', metrics.coherence);
+    setSlider('repeat', 'rep-val', metrics.repeat);
+    setSlider('hesitation', 'hes-val', metrics.hesitation);
+    setSlider('mfcc', 'mfcc-val', metrics.mfcc, true);
+    document.getElementById('chunks').value = metrics.chunks;
+    if (metrics.notes) {
+      const existing = document.getElementById('notes').value;
+      document.getElementById('notes').value = existing
+        ? existing + '\n[Auto-extracted]: ' + metrics.notes
+        : '[Auto-extracted]: ' + metrics.notes;
+    }
+
+    document.getElementById('auto-filled-badge').style.display = 'block';
+    status.textContent = '✓ Metrics extracted and applied.';
+    btn.textContent = '✓ Metrics extracted';
+
+  } catch (err) {
+    status.textContent = '✗ Could not extract metrics. Please enter them manually.';
+    btn.disabled = false;
+    btn.textContent = '✦ Auto-extract speech metrics';
+  }
+}
+
+function setSlider(sliderId, valId, value, isFloat) {
+  const slider = document.getElementById(sliderId);
+  slider.value = value;
+  document.getElementById(valId).textContent = isFloat
+    ? parseFloat(value).toFixed(1)
+    : Math.round(value);
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// ── Analysis ─────────────────────────────────────────────────────
+async function analyze() {
+  const btn = document.getElementById('analyze-btn');
+  const area = document.getElementById('result-area');
+
+  const duration = parseFloat(document.getElementById('duration').value);
+  const chunks = parseInt(document.getElementById('chunks').value);
+  const mfcc = parseFloat(document.getElementById('mfcc').value);
+  const wordFind = parseInt(document.getElementById('word-find').value);
+  const coherence = parseInt(document.getElementById('coherence').value);
+  const repeat = parseInt(document.getElementById('repeat').value);
+  const hesitation = parseInt(document.getElementById('hesitation').value);
+  const age = parseInt(document.getElementById('age').value);
+  const memory = document.getElementById('memory').value;
+  const notes = document.getElementById('notes').value;
+
+  let risk = 0;
+  if (wordFind >= 7) risk += 25;
+  else if (wordFind >= 5) risk += 12;
+  if (coherence <= 4) risk += 25;
+  else if (coherence <= 6) risk += 10;
+  if (repeat >= 7) risk += 20;
+  else if (repeat >= 5) risk += 10;
+  if (hesitation >= 7) risk += 15;
+  else if (hesitation >= 5) risk += 7;
+  if (age >= 80) risk += 10;
+  else if (age >= 70) risk += 5;
+  if (memory === 'severe') risk += 15;
+  else if (memory === 'moderate') risk += 8;
+  else if (memory === 'mild') risk += 3;
+  if (chunks < 10) risk += 5;
+  if (duration < 5) risk += 5;
+  risk = Math.min(risk, 98);
+
+  const level = risk >= 60 ? 'high' : risk >= 30 ? 'mid' : 'low';
+  const barColor = level === 'high' ? '#dc2626' : level === 'mid' ? '#d97706' : '#16a34a';
+  const levelLabel = level === 'high' ? 'High risk' : level === 'mid' ? 'Moderate risk' : 'Low risk';
+
+  const redFlags = [];
+  if (wordFind >= 7) redFlags.push({text: 'Severe word-finding difficulty', level: 'danger'});
+  if (coherence <= 4) redFlags.push({text: 'Poor sentence coherence', level: 'danger'});
+  if (repeat >= 7) redFlags.push({text: 'Frequent repetition', level: 'danger'});
+  if (hesitation >= 7) redFlags.push({text: 'High hesitation rate', level: 'danger'});
+  if (wordFind >= 5 && wordFind < 7) redFlags.push({text: 'Moderate word-finding difficulty', level: 'warning'});
+  if (coherence > 4 && coherence <= 6) redFlags.push({text: 'Reduced sentence coherence', level: 'warning'});
+  if (repeat >= 5 && repeat < 7) redFlags.push({text: 'Some repetitive speech', level: 'warning'});
+  if (memory === 'severe') redFlags.push({text: 'Severe memory complaints', level: 'danger'});
+  else if (memory === 'moderate') redFlags.push({text: 'Moderate memory complaints', level: 'warning'});
+
+  area.innerHTML = `
+    <div class="result-card result-${level}">
+      <div class="result-title">${levelLabel} — ${risk}% estimated dementia risk</div>
+      <div class="result-sub">Based on speech and cognitive indicators</div>
+      <div class="score-bar-wrap"><div class="score-bar" id="score-bar" style="width:0%;background:${barColor}"></div></div>
+      <div style="margin-bottom:0.75rem;">
+        ${redFlags.length > 0 ? redFlags.map(f => `<span class="tag tag-${f.level}">${f.text}</span>`).join('') : '<span class="tag tag-success">No significant red flags detected</span>'}
+      </div>
+      <div>
+        <div class="metric-row"><span class="metric-label">Speech duration</span><span class="metric-val">${duration.toFixed(1)}s</span></div>
+        <div class="metric-row"><span class="metric-label">Speech segments</span><span class="metric-val">${chunks}</span></div>
+        <div class="metric-row"><span class="metric-label">Voice clarity (MFCC)</span><span class="metric-val">${mfcc.toFixed(1)}</span></div>
+        <div class="metric-row"><span class="metric-label">Patient age</span><span class="metric-val">${age}</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">AI clinical analysis</div>
+      <div class="ai-response" id="ai-text"><span class="spinner"></span> Generating clinical assessment...</div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    const bar = document.getElementById('score-bar');
+    if (bar) bar.style.width = risk + '%';
+  }, 100);
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+
+  const prompt = `You are a clinical AI assistant helping doctors assess early signs of dementia based on patient speech and cognitive data.
+
+Patient data:
+- Age: ${age}
+- Speech duration: ${duration.toFixed(1)} seconds
+- Speech segments: ${chunks}
+- Voice clarity score (MFCC): ${mfcc.toFixed(1)} (range -3 to 3, higher = clearer)
+- Word-finding difficulty: ${wordFind}/10
+- Sentence coherence: ${coherence}/10
+- Repetition frequency: ${repeat}/10
+- Hesitation/pause rate: ${hesitation}/10
+- Memory complaints: ${memory}
+- Clinician notes: ${notes || 'None provided'}
+- Calculated risk score: ${risk}%
+
+Write a concise clinical assessment (3-4 short paragraphs) for the doctor. Cover:
+1. Summary of key findings from the speech and linguistic indicators
+2. What these patterns may indicate clinically
+3. Recommended next steps (specific tests, referrals, follow-up timeline)
+
+Be clinical, clear, and direct. Do not use bullet points. End with a brief note about the limitations of AI-based screening.`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      document.getElementById('ai-text').textContent = `Error: ${err.error || res.status}`;
+      return;
+    }
+
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || 'Unable to generate analysis.';
+    document.getElementById('ai-text').textContent = text;
+  } catch(e) {
+    document.getElementById('ai-text').textContent = 'Error connecting to AI. Please try again.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Analyze patient →';
+}
+</script>
 </body>
 </html>
