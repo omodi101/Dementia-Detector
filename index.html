@@ -7,55 +7,89 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
-    .app { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem; }
-    .header { margin-bottom: 1.5rem; }
-    .header h1 { font-size: 22px; font-weight: 600; }
-    .header p { font-size: 13px; color: #666; margin-top: 4px; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+
+    /* ── PORTAL ─────────────────────────────────── */
+    #portal { display: block; }
+    #app    { display: none; }
+
+    .portal-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
+    .portal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px; }
+    .portal-header h1 { font-size: 22px; font-weight: 600; }
+    .portal-header p { font-size: 13px; color: #666; margin-top: 4px; }
     .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dbeafe; color: #1e40af; margin-bottom: 8px; }
+
+    .portal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-primary { padding: 10px 20px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; transition: opacity 0.15s; }
+    .btn-primary:hover { opacity: 0.82; }
+    .btn-secondary { padding: 10px 16px; font-size: 14px; font-weight: 500; border: 1px solid #ddd; border-radius: 10px; background: #fff; color: #333; cursor: pointer; transition: background 0.15s; }
+    .btn-secondary:hover { background: #f5f5f5; }
+
+    .search-bar { position: relative; margin-bottom: 1rem; }
+    .search-bar input { width: 100%; padding: 10px 14px 10px 38px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
+    .search-bar::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; }
+
+    .patient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .patient-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1rem; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; position: relative; }
+    .patient-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #ccc; }
+    .patient-card-id { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+    .patient-card-name { font-size: 12px; color: #888; margin-bottom: 10px; }
+    .patient-card-risk { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .patient-card-risk.high { color: #dc2626; }
+    .patient-card-risk.mid  { color: #d97706; }
+    .patient-card-risk.low  { color: #16a34a; }
+    .patient-card-meta { font-size: 11px; color: #aaa; }
+    .patient-card-bar { height: 4px; border-radius: 2px; margin-top: 10px; background: #f0f0f0; overflow: hidden; }
+    .patient-card-bar-fill { height: 100%; border-radius: 2px; }
+    .patient-card-sessions { position: absolute; top: 10px; right: 10px; font-size: 10px; background: #f5f5f5; color: #888; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+    .patient-card-del { position: absolute; bottom: 10px; right: 10px; font-size: 10px; color: #ccc; background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+    .patient-card-del:hover { color: #dc2626; background: #fee2e2; }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: #aaa; }
+    .empty-state h2 { font-size: 16px; font-weight: 600; color: #888; margin-bottom: 8px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── APP ─────────────────────────────────────── */
+    .app-wrap { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+    .app-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .back-btn { font-size: 13px; color: #555; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .back-btn:hover { background: #f5f5f5; }
+    .app-nav-patient { font-size: 13px; color: #888; }
+    .app-nav-patient strong { color: #1a1a1a; font-weight: 600; }
+
     .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
     .section-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
     .field { margin-bottom: 1rem; }
     .field label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
-    .field input[type=range] { width: 100%; }
     .field-row { display: flex; align-items: center; gap: 12px; }
     .field-row input[type=range] { flex: 1; }
-    .field-val { font-size: 13px; font-weight: 600; min-width: 24px; text-align: right; color: #1a1a1a; }
-    .field input[type=number], .field input[type=text] { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
+    .field-val { font-size: 13px; font-weight: 600; min-width: 24px; text-align: right; }
+    .field input[type=number], .field input[type=text] { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    select { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
-    textarea { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; resize: vertical; font-family: system-ui, sans-serif; }
-    .analyze-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; transition: opacity 0.15s; }
-    .analyze-btn:hover { opacity: 0.85; }
-    .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .result-card { border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; }
-    .result-high { background: #fef2f2; border-color: #fecaca; }
-    .result-mid { background: #fffbeb; border-color: #fde68a; }
-    .result-low { background: #f0fdf4; border-color: #bbf7d0; }
-    .result-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-    .result-high .result-title { color: #dc2626; }
-    .result-mid .result-title { color: #d97706; }
-    .result-low .result-title { color: #16a34a; }
-    .result-sub { font-size: 13px; color: #888; margin-bottom: 1rem; }
-    .score-bar-wrap { background: rgba(0,0,0,0.08); border-radius: 20px; height: 8px; margin-bottom: 1rem; overflow: hidden; }
-    .score-bar { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
-    .metric-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
-    .metric-row:last-child { border-bottom: none; }
-    .metric-label { color: #888; }
-    .metric-val { font-weight: 600; }
-    .ai-response { font-size: 14px; line-height: 1.7; color: #1a1a1a; white-space: pre-wrap; }
-    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .disclaimer { font-size: 11px; color: #aaa; margin-top: 1rem; line-height: 1.5; }
-    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px; margin: 2px; }
-    .tag-danger { background: #fee2e2; color: #dc2626; }
-    .tag-warning { background: #fef9c3; color: #b45309; }
-    .tag-success { background: #dcfce7; color: #16a34a; }
-    /* Audio recorder */
+    select { width: 100%; padding: 6px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+    textarea { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; resize: vertical; font-family: system-ui, sans-serif; }
+
+    /* Trend chart */
+    .trend-wrap { position: relative; width: 100%; }
+    #trendChart { width: 100% !important; }
+    .trend-empty { font-size: 13px; color: #aaa; text-align: center; padding: 2rem 0; }
+    .session-list { margin-top: 0.75rem; }
+    .session-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+    .session-item:hover { background: #fafafa; }
+    .session-item:last-child { border-bottom: none; }
+    .session-date { color: #888; }
+    .session-risk { font-weight: 700; }
+    .session-risk.high { color: #dc2626; }
+    .session-risk.mid  { color: #d97706; }
+    .session-risk.low  { color: #16a34a; }
+    .session-view { font-size: 10px; color: #bbb; }
+    .clear-btn { font-size: 11px; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 8px; }
+
+    /* Recorder */
     .recorder-area { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 1rem 0; }
     .record-btn { display: flex; align-items: center; gap: 8px; padding: 10px 24px; font-size: 14px; font-weight: 600; border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
     .record-btn.idle { background: #1a1a1a; color: #fff; }
-    .record-btn.idle:hover { background: #333; }
     .record-btn.recording { background: #dc2626; color: #fff; animation: pulse-red 1.2s infinite; }
     @keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}50%{box-shadow:0 0 0 8px rgba(220,38,38,0);} }
     .record-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
@@ -65,214 +99,419 @@
     .waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 32px; }
     .waveform-bar { width: 3px; border-radius: 2px; background: #cbd5e1; transition: height 0.1s; }
     .waveform-bar.active { background: #dc2626; }
-    .audio-playback { width: 100%; margin-top: 4px; }
-    audio { width: 100%; border-radius: 8px; }
-    .extract-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #2563eb; color: #fff; cursor: pointer; transition: opacity 0.15s; }
-    .extract-btn:hover { opacity: 0.85; }
+    audio { width: 100%; border-radius: 8px; margin-top: 8px; }
+    .extract-btn { width: 100%; padding: 10px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #2563eb; color: #fff; cursor: pointer; }
     .extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .extract-status { font-size: 13px; color: #888; text-align: center; }
+    .extract-status { font-size: 13px; color: #888; text-align: center; margin-top: 8px; }
     .extracted-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #dcfce7; color: #16a34a; font-weight: 600; margin-bottom: 8px; }
     .divider { display: flex; align-items: center; gap: 10px; margin: 0.5rem 0; }
     .divider span { font-size: 11px; color: #bbb; white-space: nowrap; }
     .divider::before, .divider::after { content:''; flex:1; height:1px; background:#e5e5e5; }
-    /* PDF + action */
+
+    /* Results */
+    .result-card { border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; }
+    .result-high { background: #fef2f2; border-color: #fecaca; }
+    .result-mid  { background: #fffbeb; border-color: #fde68a; }
+    .result-low  { background: #f0fdf4; border-color: #bbf7d0; }
+    .result-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .result-high .result-title { color: #dc2626; }
+    .result-mid  .result-title { color: #d97706; }
+    .result-low  .result-title { color: #16a34a; }
+    .result-sub { font-size: 13px; color: #888; margin-bottom: 1rem; }
+    .score-bar-wrap { background: rgba(0,0,0,0.08); border-radius: 20px; height: 8px; margin-bottom: 1rem; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
+    .metric-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { color: #888; }
+    .metric-val { font-weight: 600; }
+    .ai-response { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 20px; margin: 2px; }
+    .tag-danger  { background: #fee2e2; color: #dc2626; }
+    .tag-warning { background: #fef9c3; color: #b45309; }
+    .tag-success { background: #dcfce7; color: #16a34a; }
+
+    /* Action row */
     .action-row { display: flex; gap: 10px; margin-top: 1rem; }
-    .pdf-btn { flex: 1; padding: 11px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #0f4c81; color: #fff; cursor: pointer; transition: opacity 0.15s; }
-    .pdf-btn:hover { opacity: 0.85; }
-    /* Trend */
-    .trend-wrap { position: relative; width: 100%; }
-    #trendChart { width: 100% !important; }
-    .trend-empty { font-size: 13px; color: #aaa; text-align: center; padding: 2rem 0; }
-    .session-list { margin-top: 0.75rem; }
-    .session-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
-    .session-item:last-child { border-bottom: none; }
-    .session-date { color: #888; }
-    .session-risk { font-weight: 600; }
-    .session-risk.high { color: #dc2626; }
-    .session-risk.mid { color: #d97706; }
-    .session-risk.low { color: #16a34a; }
-    .clear-sessions { font-size: 11px; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 8px; }
-    .clear-sessions:hover { color: #666; }
+    .pdf-btn { flex: 1; padding: 11px; font-size: 14px; font-weight: 600; border: none; border-radius: 10px; background: #0f4c81; color: #fff; cursor: pointer; }
+    .pdf-btn:hover { opacity: 0.88; }
+
+    .analyze-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 10px; background: #1a1a1a; color: #fff; cursor: pointer; }
+    .analyze-btn:hover { opacity: 0.85; }
+    .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .disclaimer { font-size: 11px; color: #aaa; margin-top: 1rem; line-height: 1.5; }
+
+    /* Session log modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 1.5rem; max-width: 560px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 14px; right: 14px; background: none; border: none; font-size: 18px; cursor: pointer; color: #aaa; }
+    .modal-close:hover { color: #333; }
+    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .modal-sub { font-size: 12px; color: #888; margin-bottom: 1.25rem; }
+    .log-entry { border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem; }
+    .log-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .log-entry-date { font-size: 12px; color: #888; }
+    .log-entry-risk { font-size: 16px; font-weight: 700; }
+    .log-entry-risk.high { color: #dc2626; }
+    .log-entry-risk.mid  { color: #d97706; }
+    .log-entry-risk.low  { color: #16a34a; }
+    .log-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 12px; margin-bottom: 8px; }
+    .log-metric { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #f5f5f5; }
+    .log-metric-lbl { color: #888; }
+    .log-metric-val { font-weight: 600; }
+    .log-ai { font-size: 12px; color: #555; line-height: 1.6; border-top: 1px solid #f0f0f0; padding-top: 8px; margin-top: 4px; }
   </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <div class="badge">Clinical Decision Support</div>
-    <h1>Early Dementia Detection Assistant</h1>
-    <p>Record patient speech or enter cognitive assessment data to receive an AI-powered risk analysis.</p>
-  </div>
 
-  <!-- Patient ID -->
-  <div class="card">
-    <div class="section-title">Patient identifier</div>
-    <div class="grid2">
-      <div class="field">
-        <label>Patient ID / reference</label>
-        <input type="text" id="patient-id" placeholder="e.g. PT-00142" />
+<!-- ═══════════════════════════════════════════════════
+     PATIENT PORTAL
+═══════════════════════════════════════════════════ -->
+<div id="portal">
+  <div class="portal-wrap">
+    <div class="portal-header">
+      <div>
+        <div class="badge">Clinical Decision Support</div>
+        <h1>Patient Portal</h1>
+        <p>Select an existing patient or create a new one to begin an assessment.</p>
       </div>
-      <div class="field">
-        <label>Clinician name</label>
-        <input type="text" id="clinician-name" placeholder="e.g. Dr. Sarah Mills" />
+      <div class="portal-actions">
+        <button class="btn-primary" onclick="newPatient()">+ New patient</button>
       </div>
     </div>
-  </div>
 
-  <!-- Risk Trend Chart -->
-  <div class="card">
-    <div class="section-title">Risk score trend</div>
-    <div class="trend-wrap">
-      <canvas id="trendChart" height="160"></canvas>
-      <div class="trend-empty" id="trend-empty">No sessions saved yet. Run an analysis to start tracking.</div>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search by patient ID or name..." oninput="renderPortal()" />
     </div>
-    <div class="session-list" id="session-list"></div>
-    <button class="clear-sessions" onclick="clearSessions()">Clear session history</button>
-  </div>
 
-  <!-- Audio Recorder -->
-  <div class="card">
-    <div class="section-title">Speech recording</div>
-    <p style="font-size:13px;color:#666;margin-bottom:1rem;">Record the patient speaking for at least 10 seconds. Metrics will be auto-extracted from the audio.</p>
-    <div class="recorder-area">
-      <div class="waveform" id="waveform">
-        <div class="waveform-bar" style="height:8px"></div>
-        <div class="waveform-bar" style="height:14px"></div>
-        <div class="waveform-bar" style="height:10px"></div>
-        <div class="waveform-bar" style="height:18px"></div>
-        <div class="waveform-bar" style="height:12px"></div>
-        <div class="waveform-bar" style="height:20px"></div>
-        <div class="waveform-bar" style="height:10px"></div>
-        <div class="waveform-bar" style="height:16px"></div>
-        <div class="waveform-bar" style="height:8px"></div>
-        <div class="waveform-bar" style="height:14px"></div>
-        <div class="waveform-bar" style="height:10px"></div>
-        <div class="waveform-bar" style="height:18px"></div>
-      </div>
-      <button class="record-btn idle" id="record-btn" onclick="toggleRecording()">
-        <span class="record-dot" id="record-dot"></span>
-        <span id="record-label">Start recording</span>
-      </button>
-      <span class="record-timer" id="record-timer" style="display:none">00:00</span>
-    </div>
-    <div id="audio-playback-area" style="display:none" class="audio-playback">
-      <audio id="audio-player" controls></audio>
-    </div>
-    <div id="extract-area" style="display:none;margin-top:12px;">
-      <button class="extract-btn" id="extract-btn" onclick="extractMetrics()">✦ Auto-extract speech metrics</button>
-      <p class="extract-status" id="extract-status" style="display:none;margin-top:8px;"></p>
-    </div>
-    <div class="divider" style="margin-top:1rem;"><span>or enter metrics manually below</span></div>
+    <div id="patient-grid" class="patient-grid"></div>
   </div>
+</div>
 
-  <!-- Speech Metrics -->
-  <div class="card">
-    <div class="section-title">Speech analysis metrics</div>
-    <div id="auto-filled-badge" style="display:none;margin-bottom:0.75rem;">
-      <span class="extracted-badge">✓ Auto-filled from recording</span>
-    </div>
-    <div class="grid2">
-      <div class="field">
-        <label>Speech duration (seconds)</label>
-        <input type="number" id="duration" value="12" min="1" max="120" step="0.1" />
-      </div>
-      <div class="field">
-        <label>Speech segments detected</label>
-        <input type="number" id="chunks" value="30" min="1" max="100" />
-      </div>
-    </div>
-    <div class="field">
-      <label>Voice clarity score (MFCC composite)</label>
-      <div class="field-row">
-        <input type="range" id="mfcc" min="-3" max="3" step="0.1" value="0.5" oninput="document.getElementById('mfcc-val').textContent=parseFloat(this.value).toFixed(1)" />
-        <span class="field-val" id="mfcc-val">0.5</span>
-      </div>
-    </div>
-  </div>
+<!-- ═══════════════════════════════════════════════════
+     ASSESSMENT APP
+═══════════════════════════════════════════════════ -->
+<div id="app">
+  <div class="app-wrap">
 
-  <!-- Cognitive Indicators -->
-  <div class="card">
-    <div class="section-title">Cognitive &amp; linguistic indicators</div>
-    <div class="field">
-      <label>Word-finding difficulty (1 = none, 10 = severe)</label>
-      <div class="field-row">
-        <input type="range" id="word-find" min="1" max="10" step="1" value="3" oninput="document.getElementById('wf-val').textContent=this.value" />
-        <span class="field-val" id="wf-val">3</span>
-      </div>
+    <div class="app-nav">
+      <button class="back-btn" onclick="goPortal()">← Portal</button>
+      <span class="app-nav-patient" id="app-nav-label"></span>
+      <button class="btn-secondary" style="margin-left:auto;font-size:12px;padding:6px 12px;" onclick="openLog()">View session log</button>
     </div>
-    <div class="field">
-      <label>Sentence coherence (1 = incoherent, 10 = fully coherent)</label>
-      <div class="field-row">
-        <input type="range" id="coherence" min="1" max="10" step="1" value="8" oninput="document.getElementById('coh-val').textContent=this.value" />
-        <span class="field-val" id="coh-val">8</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Repetition frequency (1 = none, 10 = frequent)</label>
-      <div class="field-row">
-        <input type="range" id="repeat" min="1" max="10" step="1" value="2" oninput="document.getElementById('rep-val').textContent=this.value" />
-        <span class="field-val" id="rep-val">2</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Hesitation / pause rate (1 = normal, 10 = very frequent)</label>
-      <div class="field-row">
-        <input type="range" id="hesitation" min="1" max="10" step="1" value="3" oninput="document.getElementById('hes-val').textContent=this.value" />
-        <span class="field-val" id="hes-val">3</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Patient Context -->
-  <div class="card">
-    <div class="section-title">Patient context (optional)</div>
-    <div class="grid2">
-      <div class="field">
-        <label>Patient age</label>
-        <input type="number" id="age" value="72" min="40" max="100" />
+    <!-- Trend chart -->
+    <div class="card">
+      <div class="section-title">Risk score trend — this patient</div>
+      <div class="trend-wrap">
+        <canvas id="trendChart" height="150"></canvas>
+        <div class="trend-empty" id="trend-empty">No sessions yet for this patient. Run an analysis to start tracking.</div>
+      </div>
+      <div class="session-list" id="session-list"></div>
+      <button class="clear-btn" onclick="clearPatientSessions()">Clear this patient's history</button>
+    </div>
+
+    <!-- Patient ID (read-only in app, set from portal) -->
+    <div class="card">
+      <div class="section-title">Patient identifier</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Patient ID</label>
+          <input type="text" id="patient-id" readonly style="background:#f9f9f9;color:#888;" />
+        </div>
+        <div class="field">
+          <label>Clinician name</label>
+          <input type="text" id="clinician-name" placeholder="e.g. Dr. Sarah Mills" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio recorder -->
+    <div class="card">
+      <div class="section-title">Speech recording</div>
+      <p style="font-size:13px;color:#666;margin-bottom:1rem;">Record the patient speaking for at least 10 seconds. Metrics will be auto-extracted.</p>
+      <div class="recorder-area">
+        <div class="waveform" id="waveform">
+          <div class="waveform-bar" style="height:8px"></div><div class="waveform-bar" style="height:14px"></div>
+          <div class="waveform-bar" style="height:10px"></div><div class="waveform-bar" style="height:18px"></div>
+          <div class="waveform-bar" style="height:12px"></div><div class="waveform-bar" style="height:20px"></div>
+          <div class="waveform-bar" style="height:10px"></div><div class="waveform-bar" style="height:16px"></div>
+          <div class="waveform-bar" style="height:8px"></div><div class="waveform-bar" style="height:14px"></div>
+          <div class="waveform-bar" style="height:10px"></div><div class="waveform-bar" style="height:18px"></div>
+        </div>
+        <button class="record-btn idle" id="record-btn" onclick="toggleRecording()">
+          <span class="record-dot" id="record-dot"></span>
+          <span id="record-label">Start recording</span>
+        </button>
+        <span class="record-timer" id="record-timer" style="display:none">00:00</span>
+      </div>
+      <div id="audio-playback-area" style="display:none"><audio id="audio-player" controls></audio></div>
+      <div id="extract-area" style="display:none;margin-top:12px;">
+        <button class="extract-btn" id="extract-btn" onclick="extractMetrics()">✦ Auto-extract speech metrics</button>
+        <p class="extract-status" id="extract-status" style="display:none;"></p>
+      </div>
+      <div class="divider" style="margin-top:1rem;"><span>or enter metrics manually below</span></div>
+    </div>
+
+    <!-- Speech metrics -->
+    <div class="card">
+      <div class="section-title">Speech analysis metrics</div>
+      <div id="auto-filled-badge" style="display:none;margin-bottom:0.75rem;"><span class="extracted-badge">✓ Auto-filled from recording</span></div>
+      <div class="grid2">
+        <div class="field">
+          <label>Speech duration (seconds)</label>
+          <input type="number" id="duration" value="12" min="1" max="120" step="0.1" />
+        </div>
+        <div class="field">
+          <label>Speech segments detected</label>
+          <input type="number" id="chunks" value="30" min="1" max="100" />
+        </div>
       </div>
       <div class="field">
-        <label>Memory complaints reported</label>
-        <select id="memory">
-          <option value="none">None</option>
-          <option value="mild">Mild</option>
-          <option value="moderate">Moderate</option>
-          <option value="severe">Severe</option>
-        </select>
+        <label>Voice clarity score (MFCC composite)</label>
+        <div class="field-row">
+          <input type="range" id="mfcc" min="-3" max="3" step="0.1" value="0.5" oninput="document.getElementById('mfcc-val').textContent=parseFloat(this.value).toFixed(1)" />
+          <span class="field-val" id="mfcc-val">0.5</span>
+        </div>
       </div>
     </div>
-    <div class="field">
-      <label>Clinician observations (free text)</label>
-      <textarea id="notes" rows="3" placeholder="e.g. Patient struggled to recall recent events, showed flat affect..."></textarea>
-    </div>
-  </div>
 
-  <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze patient →</button>
-  <div id="result-area" style="margin-top:1rem;"></div>
-  <p class="disclaimer">⚠ This tool is for research and educational purposes only. It is not a substitute for clinical diagnosis. All findings should be reviewed by a qualified physician.</p>
+    <!-- Cognitive indicators -->
+    <div class="card">
+      <div class="section-title">Cognitive &amp; linguistic indicators</div>
+      <div class="field">
+        <label>Word-finding difficulty (1 = none, 10 = severe)</label>
+        <div class="field-row">
+          <input type="range" id="word-find" min="1" max="10" step="1" value="3" oninput="document.getElementById('wf-val').textContent=this.value" />
+          <span class="field-val" id="wf-val">3</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Sentence coherence (1 = incoherent, 10 = fully coherent)</label>
+        <div class="field-row">
+          <input type="range" id="coherence" min="1" max="10" step="1" value="8" oninput="document.getElementById('coh-val').textContent=this.value" />
+          <span class="field-val" id="coh-val">8</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Repetition frequency (1 = none, 10 = frequent)</label>
+        <div class="field-row">
+          <input type="range" id="repeat" min="1" max="10" step="1" value="2" oninput="document.getElementById('rep-val').textContent=this.value" />
+          <span class="field-val" id="rep-val">2</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Hesitation / pause rate (1 = normal, 10 = very frequent)</label>
+        <div class="field-row">
+          <input type="range" id="hesitation" min="1" max="10" step="1" value="3" oninput="document.getElementById('hes-val').textContent=this.value" />
+          <span class="field-val" id="hes-val">3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient context -->
+    <div class="card">
+      <div class="section-title">Patient context (optional)</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Patient age</label>
+          <input type="number" id="age" value="72" min="40" max="100" />
+        </div>
+        <div class="field">
+          <label>Memory complaints reported</label>
+          <select id="memory">
+            <option value="none">None</option>
+            <option value="mild">Mild</option>
+            <option value="moderate">Moderate</option>
+            <option value="severe">Severe</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Clinician observations (free text)</label>
+        <textarea id="notes" rows="3" placeholder="e.g. Patient struggled to recall recent events, showed flat affect..."></textarea>
+      </div>
+    </div>
+
+    <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze patient →</button>
+    <div id="result-area" style="margin-top:1rem;"></div>
+    <p class="disclaimer">⚠ For research and educational purposes only. Not a substitute for clinical diagnosis. All findings should be reviewed by a qualified physician.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SESSION LOG MODAL
+═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="log-modal" onclick="if(event.target===this)closeLog()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLog()">✕</button>
+    <div class="modal-title" id="log-modal-title">Session Log</div>
+    <div class="modal-sub" id="log-modal-sub"></div>
+    <div id="log-entries"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     NEW PATIENT MODAL
+═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="new-patient-modal" onclick="if(event.target===this)closeNewPatient()">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeNewPatient()">✕</button>
+    <div class="modal-title">New patient</div>
+    <div class="modal-sub">Enter the patient's details to create their record.</div>
+    <div class="field">
+      <label>Patient ID <span style="color:#dc2626">*</span></label>
+      <input type="text" id="new-pid" placeholder="e.g. PT-00142" style="width:100%;padding:8px 10px;font-size:14px;border:1px solid #ddd;border-radius:8px;" />
+    </div>
+    <div class="field">
+      <label>Patient name (optional)</label>
+      <input type="text" id="new-pname" placeholder="e.g. J. Smith" style="width:100%;padding:8px 10px;font-size:14px;border:1px solid #ddd;border-radius:8px;" />
+    </div>
+    <div id="new-patient-err" style="font-size:12px;color:#dc2626;margin-bottom:8px;display:none;"></div>
+    <button class="btn-primary" style="width:100%;padding:12px;" onclick="createPatient()">Create patient record</button>
+  </div>
 </div>
 
 <script>
-// ── Session Storage ───────────────────────────────────────────────
-function getSessions() {
-  try { return JSON.parse(localStorage.getItem('dementia_sessions') || '[]'); } catch { return []; }
+// ── Storage helpers ──────────────────────────────────────────────
+function getAllPatients() {
+  try { return JSON.parse(localStorage.getItem('dda_patients') || '{}'); } catch { return {}; }
 }
-function saveSessions(s) { localStorage.setItem('dementia_sessions', JSON.stringify(s)); }
-function clearSessions() {
-  if (confirm('Clear all session history stored in this browser?')) {
-    localStorage.removeItem('dementia_sessions');
-    renderTrend();
+function saveAllPatients(p) { localStorage.setItem('dda_patients', JSON.stringify(p)); }
+
+function getPatient(pid) {
+  return getAllPatients()[pid] || null;
+}
+function savePatient(pid, data) {
+  const all = getAllPatients();
+  all[pid] = data;
+  saveAllPatients(all);
+}
+function deletePatient(pid) {
+  const all = getAllPatients();
+  delete all[pid];
+  saveAllPatients(all);
+}
+
+// ── Active patient ───────────────────────────────────────────────
+let activePatientId = null;
+let lastSession = null;
+
+// ── Portal ───────────────────────────────────────────────────────
+function renderPortal() {
+  const all = getAllPatients();
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const grid = document.getElementById('patient-grid');
+  const entries = Object.entries(all).filter(([pid, p]) =>
+    pid.toLowerCase().includes(query) || (p.name || '').toLowerCase().includes(query)
+  );
+
+  if (entries.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <h2>${query ? 'No patients found' : 'No patients yet'}</h2>
+      <p>${query ? 'Try a different search term.' : 'Click "New patient" to create your first patient record.'}</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = entries.map(([pid, p]) => {
+    const sessions = p.sessions || [];
+    const last = sessions[sessions.length - 1];
+    const risk = last ? last.risk : null;
+    const lvl = risk >= 60 ? 'high' : risk >= 30 ? 'mid' : 'low';
+    const barCol = risk >= 60 ? '#dc2626' : risk >= 30 ? '#d97706' : '#16a34a';
+    return `<div class="patient-card" onclick="openPatient('${pid}')">
+      <div class="patient-card-sessions">${sessions.length} session${sessions.length !== 1 ? 's' : ''}</div>
+      <div class="patient-card-id">${pid}</div>
+      <div class="patient-card-name">${p.name || 'No name recorded'}</div>
+      ${risk !== null
+        ? `<div class="patient-card-risk ${lvl}">${risk}%</div>
+           <div class="patient-card-meta">Last risk score · ${last.date}</div>
+           <div class="patient-card-bar"><div class="patient-card-bar-fill" style="width:${risk}%;background:${barCol}"></div></div>`
+        : `<div class="patient-card-risk" style="color:#ccc">—</div><div class="patient-card-meta">No assessments yet</div><div class="patient-card-bar"></div>`
+      }
+      <button class="patient-card-del" onclick="event.stopPropagation();deletePatientConfirm('${pid}')">Delete</button>
+    </div>`;
+  }).join('');
+}
+
+function deletePatientConfirm(pid) {
+  if (confirm(`Delete patient ${pid} and all their session history?`)) {
+    deletePatient(pid);
+    renderPortal();
   }
 }
-function addSession(data) {
-  const sessions = getSessions();
-  sessions.push(data);
-  saveSessions(sessions);
+
+function newPatient() {
+  document.getElementById('new-pid').value = '';
+  document.getElementById('new-pname').value = '';
+  document.getElementById('new-patient-err').style.display = 'none';
+  document.getElementById('new-patient-modal').classList.add('open');
+  setTimeout(() => document.getElementById('new-pid').focus(), 100);
+}
+function closeNewPatient() {
+  document.getElementById('new-patient-modal').classList.remove('open');
+}
+function createPatient() {
+  const pid = document.getElementById('new-pid').value.trim();
+  const name = document.getElementById('new-pname').value.trim();
+  const err = document.getElementById('new-patient-err');
+  if (!pid) { err.textContent = 'Patient ID is required.'; err.style.display = 'block'; return; }
+  const all = getAllPatients();
+  if (all[pid]) { err.textContent = 'A patient with this ID already exists.'; err.style.display = 'block'; return; }
+  savePatient(pid, { name, sessions: [], createdAt: new Date().toISOString() });
+  closeNewPatient();
+  openPatient(pid);
+}
+
+// ── Open patient → go to app ─────────────────────────────────────
+function openPatient(pid) {
+  activePatientId = pid;
+  const p = getPatient(pid);
+  document.getElementById('patient-id').value = pid;
+  document.getElementById('app-nav-label').innerHTML = `Patient <strong>${pid}</strong>${p.name ? ' — ' + p.name : ''}`;
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('result-area').innerHTML = '';
+  document.getElementById('auto-filled-badge').style.display = 'none';
+  // Reset form
+  ['word-find','coherence','repeat','hesitation'].forEach(id => {
+    document.getElementById(id).value = id === 'coherence' ? 8 : id === 'word-find' || id === 'hesitation' ? 3 : 2;
+  });
+  document.getElementById('wf-val').textContent = '3';
+  document.getElementById('coh-val').textContent = '8';
+  document.getElementById('rep-val').textContent = '2';
+  document.getElementById('hes-val').textContent = '3';
+  document.getElementById('mfcc').value = '0.5';
+  document.getElementById('mfcc-val').textContent = '0.5';
+  document.getElementById('duration').value = '12';
+  document.getElementById('chunks').value = '30';
+  document.getElementById('age').value = '72';
+  document.getElementById('memory').value = 'none';
+  document.getElementById('notes').value = '';
+  document.getElementById('clinician-name').value = '';
   renderTrend();
 }
 
-// ── Trend Chart (pure canvas, no lib) ────────────────────────────
+function goPortal() {
+  document.getElementById('portal').style.display = 'block';
+  document.getElementById('app').style.display = 'none';
+  activePatientId = null;
+  renderPortal();
+}
+
+// ── Per-patient trend chart ──────────────────────────────────────
+function getPatientSessions() {
+  if (!activePatientId) return [];
+  const p = getPatient(activePatientId);
+  return p ? (p.sessions || []) : [];
+}
+
 function renderTrend() {
-  const sessions = getSessions();
+  const sessions = getPatientSessions();
   const empty = document.getElementById('trend-empty');
   const canvas = document.getElementById('trendChart');
   const list = document.getElementById('session-list');
@@ -289,7 +528,7 @@ function renderTrend() {
 
   const dpr = window.devicePixelRatio || 1;
   const displayW = canvas.parentElement.offsetWidth;
-  const displayH = 160;
+  const displayH = 150;
   canvas.width = displayW * dpr;
   canvas.height = displayH * dpr;
   canvas.style.width = displayW + 'px';
@@ -298,16 +537,14 @@ function renderTrend() {
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
 
-  const pad = { top: 16, right: 16, bottom: 36, left: 40 };
+  const pad = { top: 16, right: 16, bottom: 36, left: 42 };
   const chartW = displayW - pad.left - pad.right;
   const chartH = displayH - pad.top - pad.bottom;
   const scores = sessions.map(s => s.risk);
   const labels = sessions.map(s => s.date);
-
   const xPos = i => pad.left + (scores.length === 1 ? chartW / 2 : i * chartW / (scores.length - 1));
   const yPos = v => pad.top + chartH - (v / 100) * chartH;
 
-  // Grid + y-axis labels
   [0, 30, 60, 100].forEach(v => {
     const y = yPos(v);
     ctx.beginPath();
@@ -317,370 +554,288 @@ function renderTrend() {
     ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = '#aaa';
-    ctx.font = '10px system-ui';
-    ctx.textAlign = 'right';
+    ctx.fillStyle = '#bbb'; ctx.font = '10px system-ui'; ctx.textAlign = 'right';
     ctx.fillText(v + '%', pad.left - 6, y + 4);
   });
 
-  // Risk zone labels
-  ctx.fillStyle = '#fca5a5'; ctx.font = '9px system-ui'; ctx.textAlign = 'left';
-  ctx.fillText('High', pad.left + 2, yPos(80) + 3);
-  ctx.fillStyle = '#fcd34d';
-  ctx.fillText('Mod', pad.left + 2, yPos(45) + 3);
-  ctx.fillStyle = '#86efac';
-  ctx.fillText('Low', pad.left + 2, yPos(15) + 3);
-
-  // Line
   if (scores.length > 1) {
-    ctx.beginPath();
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
     scores.forEach((s, i) => i === 0 ? ctx.moveTo(xPos(i), yPos(s)) : ctx.lineTo(xPos(i), yPos(s)));
     ctx.stroke();
   }
 
-  // Points
   scores.forEach((s, i) => {
     const color = s >= 60 ? '#dc2626' : s >= 30 ? '#d97706' : '#16a34a';
-    ctx.beginPath();
-    ctx.arc(xPos(i), yPos(s), 5, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(xPos(i), yPos(s), 5, 0, Math.PI * 2);
     ctx.fillStyle = '#fff'; ctx.fill();
     ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
-
-    // Score label above point
-    ctx.fillStyle = color;
-    ctx.font = 'bold 10px system-ui';
-    ctx.textAlign = 'center';
+    ctx.fillStyle = color; ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center';
     ctx.fillText(s + '%', xPos(i), yPos(s) - 9);
   });
 
-  // X labels
   ctx.fillStyle = '#aaa'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
   labels.forEach((l, i) => ctx.fillText(l, xPos(i), displayH - 6));
 
-  // Session list (most recent first)
-  list.innerHTML = sessions.slice().reverse().map(s => {
+  list.innerHTML = sessions.slice().reverse().map((s, i) => {
     const lvl = s.risk >= 60 ? 'high' : s.risk >= 30 ? 'mid' : 'low';
-    return `<div class="session-item">
-      <span class="session-date">${s.date}${s.patientId ? ' · ' + s.patientId : ''}</span>
+    return `<div class="session-item" onclick="openLogAt(${sessions.length - 1 - i})">
+      <span class="session-date">${s.date}</span>
       <span class="session-risk ${lvl}">${s.risk}% risk</span>
+      <span class="session-view">View →</span>
     </div>`;
   }).join('');
 }
 
-// ── PDF Export ────────────────────────────────────────────────────
+function clearPatientSessions() {
+  if (!activePatientId) return;
+  if (confirm('Clear all session history for this patient?')) {
+    const p = getPatient(activePatientId);
+    p.sessions = [];
+    savePatient(activePatientId, p);
+    renderTrend();
+    renderPortal();
+  }
+}
+
+// ── Session log modal ────────────────────────────────────────────
+function openLog() {
+  if (!activePatientId) return;
+  const p = getPatient(activePatientId);
+  const sessions = (p?.sessions || []).slice().reverse();
+  document.getElementById('log-modal-title').textContent = `Session Log — ${activePatientId}`;
+  document.getElementById('log-modal-sub').textContent = `${p.name || ''} · ${sessions.length} session${sessions.length !== 1 ? 's' : ''}`;
+  document.getElementById('log-entries').innerHTML = sessions.length === 0
+    ? '<p style="color:#aaa;font-size:13px;text-align:center;padding:2rem 0;">No sessions recorded yet.</p>'
+    : sessions.map(s => {
+        const lvl = s.risk >= 60 ? 'high' : s.risk >= 30 ? 'mid' : 'low';
+        return `<div class="log-entry">
+          <div class="log-entry-header">
+            <span class="log-entry-date">${s.date}</span>
+            <span class="log-entry-risk ${lvl}">${s.risk}% risk</span>
+          </div>
+          <div class="log-metrics">
+            <div class="log-metric"><span class="log-metric-lbl">Word-finding</span><span class="log-metric-val">${s.wordFind}/10</span></div>
+            <div class="log-metric"><span class="log-metric-lbl">Coherence</span><span class="log-metric-val">${s.coherence}/10</span></div>
+            <div class="log-metric"><span class="log-metric-lbl">Repetition</span><span class="log-metric-val">${s.repeat}/10</span></div>
+            <div class="log-metric"><span class="log-metric-lbl">Hesitation</span><span class="log-metric-val">${s.hesitation}/10</span></div>
+            <div class="log-metric"><span class="log-metric-lbl">Age</span><span class="log-metric-val">${s.age}</span></div>
+            <div class="log-metric"><span class="log-metric-lbl">Memory complaints</span><span class="log-metric-val">${s.memory}</span></div>
+          </div>
+          ${s.aiText ? `<div class="log-ai">${s.aiText.slice(0, 300)}${s.aiText.length > 300 ? '…' : ''}</div>` : ''}
+        </div>`;
+      }).join('');
+  document.getElementById('log-modal').classList.add('open');
+}
+
+function openLogAt(idx) {
+  openLog();
+  // Scroll to nth entry
+  setTimeout(() => {
+    const entries = document.querySelectorAll('.log-entry');
+    if (entries[idx]) entries[idx].scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+function closeLog() {
+  document.getElementById('log-modal').classList.remove('open');
+}
+
+// ── PDF export ───────────────────────────────────────────────────
 function exportPDF(session) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const W = 210, H = 297, m = 20, col = W - m * 2;
   let y = 0;
 
-  // Header
-  doc.setFillColor(15, 76, 129);
-  doc.rect(0, 0, W, 30, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.setFillColor(15, 76, 129); doc.rect(0, 0, W, 30, 'F');
+  doc.setFillColor(100, 160, 220); doc.rect(0, 30, W, 2, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(14); doc.setFont('helvetica','bold');
   doc.text('COGNITIVE RISK ASSESSMENT REPORT', m, 13);
-  doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
   doc.text('Early Dementia Detection Assistant  ·  Clinical Decision Support', m, 20);
   doc.text('Generated: ' + new Date().toLocaleString(), W - m, 20, { align: 'right' });
-
-  // Thin accent line
-  doc.setFillColor(100, 160, 220);
-  doc.rect(0, 30, W, 2, 'F');
   y = 40;
 
-  // Patient info box
-  doc.setFillColor(245, 247, 250);
-  doc.setDrawColor(220, 225, 230);
+  doc.setFillColor(245,247,250); doc.setDrawColor(220,225,230);
   doc.roundedRect(m, y, col, 26, 2, 2, 'FD');
-  const infoFields = [
-    ['PATIENT ID', session.patientId || '—', m + 4],
-    ['CLINICIAN', session.clinician || '—', m + 55],
-    ['ASSESSMENT DATE', session.date, m + 110],
-    ['AGE', String(session.age), m + 162],
-  ];
-  infoFields.forEach(([label, val, x]) => {
-    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(120, 130, 145);
-    doc.text(label, x, y + 8);
-    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
-    doc.text(val, x, y + 18);
+  [['PATIENT ID', session.patientId||'—', m+4],['CLINICIAN', session.clinician||'—', m+55],['DATE', session.date, m+110],['AGE', String(session.age), m+162]].forEach(([lbl,val,x])=>{
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(120,130,145); doc.text(lbl, x, y+8);
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20); doc.text(val, x, y+18);
   });
   y += 34;
 
-  // Risk block
-  const riskRGB = session.risk >= 60 ? [220,38,38] : session.risk >= 30 ? [217,119,6] : [22,163,74];
-  const riskLabel = session.risk >= 60 ? 'HIGH RISK' : session.risk >= 30 ? 'MODERATE RISK' : 'LOW RISK';
-  doc.setFillColor(...riskRGB);
-  doc.roundedRect(m, y, col, 20, 2, 2, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(20); doc.setFont('helvetica', 'bold');
-  doc.text(session.risk + '%', m + 6, y + 13);
-  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
-  doc.text('Estimated Dementia Risk   ·   ' + riskLabel, m + 22, y + 13);
+  const riskRGB = session.risk>=60?[220,38,38]:session.risk>=30?[217,119,6]:[22,163,74];
+  const riskLabel = session.risk>=60?'HIGH RISK':session.risk>=30?'MODERATE RISK':'LOW RISK';
+  doc.setFillColor(...riskRGB); doc.roundedRect(m, y, col, 20, 2, 2, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text(session.risk+'%', m+6, y+13);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('Estimated Dementia Risk   ·   '+riskLabel, m+22, y+13);
   y += 26;
 
-  // Progress bar
-  doc.setFillColor(225, 225, 225);
-  doc.roundedRect(m, y, col, 4, 1, 1, 'F');
-  doc.setFillColor(...riskRGB);
-  doc.roundedRect(m, y, col * (session.risk / 100), 4, 1, 1, 'F');
+  doc.setFillColor(225,225,225); doc.roundedRect(m, y, col, 4, 1,1,'F');
+  doc.setFillColor(...riskRGB); doc.roundedRect(m, y, col*(session.risk/100), 4, 1,1,'F');
   y += 10;
 
-  // Section header helper
   function sectionHeader(title) {
-    doc.setFillColor(237, 242, 247);
-    doc.rect(m, y, col, 7, 'F');
-    doc.setDrawColor(210, 218, 228);
-    doc.rect(m, y, col, 7, 'D');
-    doc.setTextColor(50, 80, 120);
-    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-    doc.text(title, m + 3, y + 5);
-    y += 9;
+    doc.setFillColor(237,242,247); doc.rect(m, y, col, 7, 'F');
+    doc.setDrawColor(210,218,228); doc.rect(m, y, col, 7, 'D');
+    doc.setTextColor(50,80,120); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+    doc.text(title, m+3, y+5); y += 9;
   }
-
-  // Table row helper
   function tableRow(label, val, rowIdx) {
-    doc.setFillColor(rowIdx % 2 === 0 ? 252 : 255, rowIdx % 2 === 0 ? 252 : 255, rowIdx % 2 === 0 ? 252 : 255);
+    doc.setFillColor(rowIdx%2===0?252:255,rowIdx%2===0?252:255,rowIdx%2===0?252:255);
     doc.rect(m, y, col, 7, 'F');
-    doc.setDrawColor(240, 240, 240);
-    doc.line(m, y + 7, m + col, y + 7);
-    doc.setTextColor(100,100,100); doc.setFontSize(8.5); doc.setFont('helvetica', 'normal');
-    doc.text(label, m + 3, y + 5);
-    doc.setTextColor(20,20,20); doc.setFont('helvetica', 'bold');
-    doc.text(String(val), W - m - 3, y + 5, { align: 'right' });
+    doc.setDrawColor(240,240,240); doc.line(m, y+7, m+col, y+7);
+    doc.setTextColor(100,100,100); doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.text(label, m+3, y+5);
+    doc.setTextColor(20,20,20); doc.setFont('helvetica','bold'); doc.text(String(val), W-m-3, y+5, {align:'right'});
     y += 7;
   }
 
-  // Speech metrics
   sectionHeader('SPEECH ANALYSIS METRICS');
-  tableRow('Speech Duration', session.duration + 's', 0);
+  tableRow('Speech Duration', session.duration+'s', 0);
   tableRow('Speech Segments', session.chunks, 1);
-  tableRow('Voice Clarity (MFCC composite)', session.mfcc, 2);
+  tableRow('Voice Clarity (MFCC)', session.mfcc, 2);
   y += 4;
 
-  // Cognitive indicators
   sectionHeader('COGNITIVE & LINGUISTIC INDICATORS');
-  tableRow('Word-finding Difficulty', session.wordFind + ' / 10', 0);
-  tableRow('Sentence Coherence', session.coherence + ' / 10', 1);
-  tableRow('Repetition Frequency', session.repeat + ' / 10', 2);
-  tableRow('Hesitation / Pause Rate', session.hesitation + ' / 10', 3);
-  tableRow('Memory Complaints Reported', session.memory.charAt(0).toUpperCase() + session.memory.slice(1), 4);
+  tableRow('Word-finding Difficulty', session.wordFind+' / 10', 0);
+  tableRow('Sentence Coherence', session.coherence+' / 10', 1);
+  tableRow('Repetition Frequency', session.repeat+' / 10', 2);
+  tableRow('Hesitation / Pause Rate', session.hesitation+' / 10', 3);
+  tableRow('Memory Complaints', session.memory.charAt(0).toUpperCase()+session.memory.slice(1), 4);
   y += 4;
 
-  // AI assessment
   sectionHeader('AI CLINICAL ASSESSMENT');
-  doc.setTextColor(25,25,25); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  const aiLines = doc.splitTextToSize(session.aiText || 'No AI assessment generated.', col - 4);
-  aiLines.forEach(line => {
-    if (y > H - 36) { doc.addPage(); y = 20; }
-    doc.text(line, m + 2, y);
-    y += 5;
+  doc.setTextColor(25,25,25); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.splitTextToSize(session.aiText||'No AI assessment generated.', col-4).forEach(line => {
+    if (y > H-36) { doc.addPage(); y = 20; }
+    doc.text(line, m+2, y); y += 5;
   });
   y += 4;
 
-  // Clinician notes
   if (session.notes) {
-    if (y > H - 36) { doc.addPage(); y = 20; }
+    if (y > H-36) { doc.addPage(); y = 20; }
     sectionHeader('CLINICIAN OBSERVATIONS');
-    doc.setTextColor(25,25,25); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-    const noteLines = doc.splitTextToSize(session.notes, col - 4);
-    noteLines.forEach(line => {
-      if (y > H - 36) { doc.addPage(); y = 20; }
-      doc.text(line, m + 2, y);
-      y += 5;
+    doc.setTextColor(25,25,25); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.splitTextToSize(session.notes, col-4).forEach(line => {
+      if (y > H-36) { doc.addPage(); y = 20; }
+      doc.text(line, m+2, y); y += 5;
     });
   }
 
-  // Signature line
-  if (y < H - 50) {
+  if (y < H-50) {
     y += 10;
-    doc.setDrawColor(180,180,180);
-    doc.line(m, y, m + 70, y);
-    doc.setFontSize(8); doc.setTextColor(150,150,150); doc.setFont('helvetica', 'normal');
-    doc.text('Clinician signature', m, y + 5);
-    doc.line(m + 100, y, m + 170, y);
-    doc.text('Date', m + 100, y + 5);
+    doc.setDrawColor(180,180,180); doc.line(m, y, m+70, y);
+    doc.setFontSize(8); doc.setTextColor(150,150,150); doc.setFont('helvetica','normal');
+    doc.text('Clinician signature', m, y+5);
+    doc.line(m+100, y, m+170, y); doc.text('Date', m+100, y+5);
   }
 
-  // Footer
-  doc.setFillColor(15, 76, 129);
-  doc.rect(0, H - 14, W, 14, 'F');
-  doc.setFillColor(100, 160, 220);
-  doc.rect(0, H - 14, W, 1.5, 'F');
-  doc.setTextColor(200, 215, 230); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('FOR RESEARCH & EDUCATIONAL USE ONLY · NOT A SUBSTITUTE FOR CLINICAL DIAGNOSIS · REVIEW ALL FINDINGS WITH A QUALIFIED PHYSICIAN', W/2, H - 7, { align: 'center' });
+  doc.setFillColor(15,76,129); doc.rect(0, H-14, W, 14, 'F');
+  doc.setFillColor(100,160,220); doc.rect(0, H-14, W, 1.5, 'F');
+  doc.setTextColor(200,215,230); doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text('FOR RESEARCH & EDUCATIONAL USE ONLY · NOT A SUBSTITUTE FOR CLINICAL DIAGNOSIS', W/2, H-7, {align:'center'});
 
-  const pid = (session.patientId || 'patient').replace(/[^a-z0-9]/gi, '_');
-  doc.save(`cognitive_assessment_${pid}_${session.date.replace(/[\s/]/g, '-')}.pdf`);
+  const pid = (session.patientId||'patient').replace(/[^a-z0-9]/gi,'_');
+  doc.save(`cognitive_assessment_${pid}_${session.date.replace(/[\s/]/g,'-')}.pdf`);
 }
 
-// ── Audio Recording ───────────────────────────────────────────────
-let mediaRecorder = null, audioChunks = [], recordingInterval = null;
-let recordingSeconds = 0, audioBlob = null, animFrame = null, waveformActive = false;
-
-function formatTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
-
-function setWaveformActive(active) {
-  waveformActive = active;
-  document.querySelectorAll('.waveform-bar').forEach(b => { b.classList.toggle('active', active); if (!active) b.style.height = '8px'; });
-}
-
-function animateWaveform(analyser) {
-  const bars = document.querySelectorAll('.waveform-bar');
-  const data = new Uint8Array(analyser.frequencyBinCount);
-  const step = Math.floor(analyser.frequencyBinCount / bars.length);
-  function draw() {
-    if (!waveformActive) return;
-    animFrame = requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(data);
-    bars.forEach((b, i) => { b.style.height = Math.max(4, Math.min(28, (data[i*step]||0)/255*28)) + 'px'; });
-  }
-  draw();
-}
-
-async function toggleRecording() {
-  if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
-  else await startRecording();
-}
-
-async function startRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioChunks = []; recordingSeconds = 0;
-    const audioCtx = new AudioContext();
-    const source = audioCtx.createMediaStreamSource(stream);
-    const analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
-    source.connect(analyser);
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.onstop = onRecordingStop;
-    mediaRecorder.start(100);
-    document.getElementById('record-btn').className = 'record-btn recording';
-    document.getElementById('record-label').textContent = 'Stop recording';
+// ── Audio recording ──────────────────────────────────────────────
+let mediaRecorder=null,audioChunks=[],recordingInterval=null,recordingSeconds=0,audioBlob=null,animFrame=null,waveformActive=false;
+function formatTime(s){return`${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;}
+function setWaveformActive(a){waveformActive=a;document.querySelectorAll('.waveform-bar').forEach(b=>{b.classList.toggle('active',a);if(!a)b.style.height='8px';});}
+function animateWaveform(analyser){const bars=document.querySelectorAll('.waveform-bar');const data=new Uint8Array(analyser.frequencyBinCount);const step=Math.floor(analyser.frequencyBinCount/bars.length);function draw(){if(!waveformActive)return;animFrame=requestAnimationFrame(draw);analyser.getByteFrequencyData(data);bars.forEach((b,i)=>{b.style.height=Math.max(4,Math.min(28,(data[i*step]||0)/255*28))+'px';});}draw();}
+async function toggleRecording(){if(mediaRecorder&&mediaRecorder.state==='recording')stopRecording();else await startRecording();}
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];recordingSeconds=0;
+    const audioCtx=new AudioContext();const source=audioCtx.createMediaStreamSource(stream);const analyser=audioCtx.createAnalyser();analyser.fftSize=256;source.connect(analyser);
+    mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=onRecordingStop;mediaRecorder.start(100);
+    document.getElementById('record-btn').className='record-btn recording';
+    document.getElementById('record-label').textContent='Stop recording';
     document.getElementById('record-dot').classList.add('recording');
-    document.getElementById('record-timer').style.display = 'inline';
-    document.getElementById('record-timer').textContent = '00:00';
-    document.getElementById('audio-playback-area').style.display = 'none';
-    document.getElementById('extract-area').style.display = 'none';
-    setWaveformActive(true); animateWaveform(analyser);
-    recordingInterval = setInterval(() => { recordingSeconds++; document.getElementById('record-timer').textContent = formatTime(recordingSeconds); }, 1000);
-  } catch(e) { alert('Microphone access denied. Please allow microphone access to use this feature.'); }
+    document.getElementById('record-timer').style.display='inline';
+    document.getElementById('record-timer').textContent='00:00';
+    document.getElementById('audio-playback-area').style.display='none';
+    document.getElementById('extract-area').style.display='none';
+    setWaveformActive(true);animateWaveform(analyser);
+    recordingInterval=setInterval(()=>{recordingSeconds++;document.getElementById('record-timer').textContent=formatTime(recordingSeconds);},1000);
+  }catch(e){alert('Microphone access denied.');}
 }
+function stopRecording(){if(mediaRecorder){mediaRecorder.stop();mediaRecorder.stream.getTracks().forEach(t=>t.stop());}clearInterval(recordingInterval);setWaveformActive(false);cancelAnimationFrame(animFrame);document.getElementById('record-btn').className='record-btn idle';document.getElementById('record-label').textContent='Record again';document.getElementById('record-dot').classList.remove('recording');}
+function onRecordingStop(){audioBlob=new Blob(audioChunks,{type:'audio/webm'});document.getElementById('audio-player').src=URL.createObjectURL(audioBlob);document.getElementById('audio-playback-area').style.display='block';document.getElementById('extract-area').style.display='block';document.getElementById('duration').value=recordingSeconds.toFixed(1);}
 
-function stopRecording() {
-  if (mediaRecorder) { mediaRecorder.stop(); mediaRecorder.stream.getTracks().forEach(t => t.stop()); }
-  clearInterval(recordingInterval); setWaveformActive(false); cancelAnimationFrame(animFrame);
-  document.getElementById('record-btn').className = 'record-btn idle';
-  document.getElementById('record-label').textContent = 'Record again';
-  document.getElementById('record-dot').classList.remove('recording');
-}
-
-function onRecordingStop() {
-  audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-  document.getElementById('audio-player').src = URL.createObjectURL(audioBlob);
-  document.getElementById('audio-playback-area').style.display = 'block';
-  document.getElementById('extract-area').style.display = 'block';
-  document.getElementById('duration').value = recordingSeconds.toFixed(1);
-}
-
-// ── Metric Extraction ─────────────────────────────────────────────
-async function extractMetrics() {
-  const btn = document.getElementById('extract-btn');
-  const status = document.getElementById('extract-status');
-  if (!audioBlob) return;
-  btn.disabled = true; status.style.display = 'block'; status.textContent = '⏳ Analysing speech patterns...';
-  try {
-    const prompt = `You are a clinical speech analysis AI. A clinician recorded a patient speaking for ${recordingSeconds} seconds. Return ONLY a JSON object, no explanation or markdown:
+// ── Metric extraction ────────────────────────────────────────────
+async function extractMetrics(){
+  const btn=document.getElementById('extract-btn');const status=document.getElementById('extract-status');
+  if(!audioBlob)return;btn.disabled=true;status.style.display='block';status.textContent='⏳ Analysing speech patterns...';
+  try{
+    const prompt=`You are a clinical speech analysis AI. A clinician recorded a patient speaking for ${recordingSeconds} seconds. Return ONLY a JSON object, no explanation or markdown:
 {"chunks":<int 1-100>,"mfcc":<float -3 to 3>,"wordFind":<int 1-10>,"coherence":<int 1-10>,"repeat":<int 1-10>,"hesitation":<int 1-10>,"notes":"<one clinical observation sentence>"}
-Duration: ${recordingSeconds}s. Use moderate defaults. Under 8s = higher hesitation/word-finding scores.`;
-    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages:[{ role:'user', content: prompt }] }) });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const metrics = JSON.parse((data.choices?.[0]?.message?.content || '{}').replace(/```json|```/g,'').trim());
-    setSlider('word-find','wf-val', metrics.wordFind);
-    setSlider('coherence','coh-val', metrics.coherence);
-    setSlider('repeat','rep-val', metrics.repeat);
-    setSlider('hesitation','hes-val', metrics.hesitation);
-    setSlider('mfcc','mfcc-val', metrics.mfcc, true);
-    document.getElementById('chunks').value = metrics.chunks;
-    if (metrics.notes) {
-      const n = document.getElementById('notes');
-      n.value = n.value ? n.value + '\n[Auto]: ' + metrics.notes : '[Auto]: ' + metrics.notes;
-    }
-    document.getElementById('auto-filled-badge').style.display = 'block';
-    status.textContent = '✓ Metrics extracted and applied.';
-    btn.textContent = '✓ Done';
-  } catch {
-    status.textContent = '✗ Could not extract metrics. Please enter them manually.';
-    btn.disabled = false; btn.textContent = '✦ Auto-extract speech metrics';
-  }
+Duration: ${recordingSeconds}s. Use moderate defaults. Under 8s = higher hesitation/word-finding.`;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
+    if(!res.ok)throw new Error();
+    const data=await res.json();
+    const metrics=JSON.parse((data.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim());
+    setSlider('word-find','wf-val',metrics.wordFind);setSlider('coherence','coh-val',metrics.coherence);
+    setSlider('repeat','rep-val',metrics.repeat);setSlider('hesitation','hes-val',metrics.hesitation);
+    setSlider('mfcc','mfcc-val',metrics.mfcc,true);document.getElementById('chunks').value=metrics.chunks;
+    if(metrics.notes){const n=document.getElementById('notes');n.value=n.value?n.value+'\n[Auto]: '+metrics.notes:'[Auto]: '+metrics.notes;}
+    document.getElementById('auto-filled-badge').style.display='block';
+    status.textContent='✓ Metrics extracted and applied.';btn.textContent='✓ Done';
+  }catch{status.textContent='✗ Could not extract. Please enter manually.';btn.disabled=false;btn.textContent='✦ Auto-extract speech metrics';}
 }
+function setSlider(sid,vid,val,isFloat){document.getElementById(sid).value=val;document.getElementById(vid).textContent=isFloat?parseFloat(val).toFixed(1):Math.round(val);}
 
-function setSlider(sid, vid, val, isFloat) {
-  document.getElementById(sid).value = val;
-  document.getElementById(vid).textContent = isFloat ? parseFloat(val).toFixed(1) : Math.round(val);
-}
+// ── Analysis ─────────────────────────────────────────────────────
+async function analyze(){
+  if(!activePatientId){alert('No patient selected.');return;}
+  const btn=document.getElementById('analyze-btn');const area=document.getElementById('result-area');
+  const duration=parseFloat(document.getElementById('duration').value);
+  const chunks=parseInt(document.getElementById('chunks').value);
+  const mfcc=parseFloat(document.getElementById('mfcc').value);
+  const wordFind=parseInt(document.getElementById('word-find').value);
+  const coherence=parseInt(document.getElementById('coherence').value);
+  const repeat=parseInt(document.getElementById('repeat').value);
+  const hesitation=parseInt(document.getElementById('hesitation').value);
+  const age=parseInt(document.getElementById('age').value);
+  const memory=document.getElementById('memory').value;
+  const notes=document.getElementById('notes').value;
+  const clinician=document.getElementById('clinician-name').value.trim();
 
-function blobToBase64(blob) {
-  return new Promise((res, rej) => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
-}
+  let risk=0;
+  if(wordFind>=7)risk+=25;else if(wordFind>=5)risk+=12;
+  if(coherence<=4)risk+=25;else if(coherence<=6)risk+=10;
+  if(repeat>=7)risk+=20;else if(repeat>=5)risk+=10;
+  if(hesitation>=7)risk+=15;else if(hesitation>=5)risk+=7;
+  if(age>=80)risk+=10;else if(age>=70)risk+=5;
+  if(memory==='severe')risk+=15;else if(memory==='moderate')risk+=8;else if(memory==='mild')risk+=3;
+  if(chunks<10)risk+=5;if(duration<5)risk+=5;
+  risk=Math.min(risk,98);
 
-// ── Analysis ──────────────────────────────────────────────────────
-let lastSession = null;
+  const level=risk>=60?'high':risk>=30?'mid':'low';
+  const barColor=level==='high'?'#dc2626':level==='mid'?'#d97706':'#16a34a';
+  const levelLabel=level==='high'?'High risk':level==='mid'?'Moderate risk':'Low risk';
 
-async function analyze() {
-  const btn = document.getElementById('analyze-btn');
-  const area = document.getElementById('result-area');
+  const redFlags=[];
+  if(wordFind>=7)redFlags.push({text:'Severe word-finding difficulty',level:'danger'});
+  if(coherence<=4)redFlags.push({text:'Poor sentence coherence',level:'danger'});
+  if(repeat>=7)redFlags.push({text:'Frequent repetition',level:'danger'});
+  if(hesitation>=7)redFlags.push({text:'High hesitation rate',level:'danger'});
+  if(wordFind>=5&&wordFind<7)redFlags.push({text:'Moderate word-finding difficulty',level:'warning'});
+  if(coherence>4&&coherence<=6)redFlags.push({text:'Reduced sentence coherence',level:'warning'});
+  if(repeat>=5&&repeat<7)redFlags.push({text:'Some repetitive speech',level:'warning'});
+  if(memory==='severe')redFlags.push({text:'Severe memory complaints',level:'danger'});
+  else if(memory==='moderate')redFlags.push({text:'Moderate memory complaints',level:'warning'});
 
-  const duration = parseFloat(document.getElementById('duration').value);
-  const chunks = parseInt(document.getElementById('chunks').value);
-  const mfcc = parseFloat(document.getElementById('mfcc').value);
-  const wordFind = parseInt(document.getElementById('word-find').value);
-  const coherence = parseInt(document.getElementById('coherence').value);
-  const repeat = parseInt(document.getElementById('repeat').value);
-  const hesitation = parseInt(document.getElementById('hesitation').value);
-  const age = parseInt(document.getElementById('age').value);
-  const memory = document.getElementById('memory').value;
-  const notes = document.getElementById('notes').value;
-  const patientId = document.getElementById('patient-id').value.trim();
-  const clinician = document.getElementById('clinician-name').value.trim();
-
-  let risk = 0;
-  if (wordFind >= 7) risk += 25; else if (wordFind >= 5) risk += 12;
-  if (coherence <= 4) risk += 25; else if (coherence <= 6) risk += 10;
-  if (repeat >= 7) risk += 20; else if (repeat >= 5) risk += 10;
-  if (hesitation >= 7) risk += 15; else if (hesitation >= 5) risk += 7;
-  if (age >= 80) risk += 10; else if (age >= 70) risk += 5;
-  if (memory === 'severe') risk += 15; else if (memory === 'moderate') risk += 8; else if (memory === 'mild') risk += 3;
-  if (chunks < 10) risk += 5;
-  if (duration < 5) risk += 5;
-  risk = Math.min(risk, 98);
-
-  const level = risk >= 60 ? 'high' : risk >= 30 ? 'mid' : 'low';
-  const barColor = level === 'high' ? '#dc2626' : level === 'mid' ? '#d97706' : '#16a34a';
-  const levelLabel = level === 'high' ? 'High risk' : level === 'mid' ? 'Moderate risk' : 'Low risk';
-
-  const redFlags = [];
-  if (wordFind >= 7) redFlags.push({text:'Severe word-finding difficulty',level:'danger'});
-  if (coherence <= 4) redFlags.push({text:'Poor sentence coherence',level:'danger'});
-  if (repeat >= 7) redFlags.push({text:'Frequent repetition',level:'danger'});
-  if (hesitation >= 7) redFlags.push({text:'High hesitation rate',level:'danger'});
-  if (wordFind >= 5 && wordFind < 7) redFlags.push({text:'Moderate word-finding difficulty',level:'warning'});
-  if (coherence > 4 && coherence <= 6) redFlags.push({text:'Reduced sentence coherence',level:'warning'});
-  if (repeat >= 5 && repeat < 7) redFlags.push({text:'Some repetitive speech',level:'warning'});
-  if (memory === 'severe') redFlags.push({text:'Severe memory complaints',level:'danger'});
-  else if (memory === 'moderate') redFlags.push({text:'Moderate memory complaints',level:'warning'});
-
-  area.innerHTML = `
+  area.innerHTML=`
     <div class="result-card result-${level}">
       <div class="result-title">${levelLabel} — ${risk}% estimated dementia risk</div>
       <div class="result-sub">Based on speech and cognitive indicators</div>
       <div class="score-bar-wrap"><div class="score-bar" id="score-bar" style="width:0%;background:${barColor}"></div></div>
-      <div style="margin-bottom:0.75rem;">
-        ${redFlags.length > 0 ? redFlags.map(f=>`<span class="tag tag-${f.level}">${f.text}</span>`).join('') : '<span class="tag tag-success">No significant red flags detected</span>'}
-      </div>
+      <div style="margin-bottom:0.75rem;">${redFlags.length>0?redFlags.map(f=>`<span class="tag tag-${f.level}">${f.text}</span>`).join(''):'<span class="tag tag-success">No significant red flags detected</span>'}</div>
       <div>
         <div class="metric-row"><span class="metric-label">Speech duration</span><span class="metric-val">${duration.toFixed(1)}s</span></div>
         <div class="metric-row"><span class="metric-label">Speech segments</span><span class="metric-val">${chunks}</span></div>
@@ -694,61 +849,53 @@ async function analyze() {
     </div>
     <div class="action-row" id="action-row" style="display:none">
       <button class="pdf-btn" onclick="exportPDF(lastSession)">⬇ Export PDF Report</button>
-    </div>
-  `;
+    </div>`;
 
-  setTimeout(() => { const b = document.getElementById('score-bar'); if(b) b.style.width = risk+'%'; }, 100);
-  btn.disabled = true; btn.textContent = 'Analyzing...';
+  setTimeout(()=>{const b=document.getElementById('score-bar');if(b)b.style.width=risk+'%';},100);
+  btn.disabled=true;btn.textContent='Analyzing...';
 
-  const prompt = `You are a clinical AI assistant helping doctors assess early signs of dementia based on patient speech and cognitive data.
-
+  const prompt=`You are a clinical AI assistant helping doctors assess early signs of dementia based on patient speech and cognitive data.
 Patient data:
 - Age: ${age}
 - Speech duration: ${duration.toFixed(1)} seconds
 - Speech segments: ${chunks}
-- Voice clarity score (MFCC): ${mfcc.toFixed(1)} (range -3 to 3, higher = clearer)
+- Voice clarity (MFCC): ${mfcc.toFixed(1)} (range -3 to 3, higher = clearer)
 - Word-finding difficulty: ${wordFind}/10
 - Sentence coherence: ${coherence}/10
 - Repetition frequency: ${repeat}/10
 - Hesitation/pause rate: ${hesitation}/10
 - Memory complaints: ${memory}
-- Clinician notes: ${notes || 'None provided'}
+- Clinician notes: ${notes||'None provided'}
 - Calculated risk score: ${risk}%
+Write a concise clinical assessment (3-4 short paragraphs). Cover: 1. Key findings from speech and linguistic indicators. 2. What these patterns may indicate clinically. 3. Recommended next steps (specific tests, referrals, follow-up timeline). Be clinical, clear, and direct. No bullet points. End with a brief note on the limitations of AI-based screening.`;
 
-Write a concise clinical assessment (3-4 short paragraphs) for the doctor. Cover:
-1. Summary of key findings from the speech and linguistic indicators
-2. What these patterns may indicate clinically
-3. Recommended next steps (specific tests, referrals, follow-up timeline)
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const err=await res.json().catch(()=>({}));document.getElementById('ai-text').textContent=`Error: ${err.error||res.status}`;return;}
+    const data=await res.json();
+    const text=data.choices?.[0]?.message?.content||'Unable to generate analysis.';
+    document.getElementById('ai-text').textContent=text;
 
-Be clinical, clear, and direct. Do not use bullet points. End with a brief note about the limitations of AI-based screening.`;
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    lastSession={patientId:activePatientId,clinician,date:dateStr,age,risk,duration:duration.toFixed(1),chunks,mfcc:mfcc.toFixed(1),wordFind,coherence,repeat,hesitation,memory,notes,aiText:text};
 
-  try {
-    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages:[{role:'user', content: prompt}] }) });
-    if (!res.ok) {
-      const err = await res.json().catch(()=>({}));
-      document.getElementById('ai-text').textContent = `Error: ${err.error || res.status}`;
-      return;
+    // Save session to THIS patient only
+    const p=getPatient(activePatientId);
+    if(p){
+      p.sessions=p.sessions||[];
+      p.sessions.push({date:dateStr,risk,wordFind,coherence,repeat,hesitation,age,memory,notes,aiText:text,clinician});
+      savePatient(activePatientId,p);
     }
-    const data = await res.json();
-    const text = data.choices?.[0]?.message?.content || 'Unable to generate analysis.';
-    document.getElementById('ai-text').textContent = text;
+    renderTrend();
+    document.getElementById('action-row').style.display='flex';
+  }catch(e){document.getElementById('ai-text').textContent='Error connecting to AI. Please try again.';}
 
-    // Save session & show PDF button
-    const dateStr = new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-    lastSession = { patientId, clinician, date: dateStr, age, risk, duration: duration.toFixed(1), chunks, mfcc: mfcc.toFixed(1), wordFind, coherence, repeat, hesitation, memory, notes, aiText: text };
-    addSession({ patientId, date: dateStr, risk });
-    document.getElementById('action-row').style.display = 'flex';
-
-  } catch(e) {
-    document.getElementById('ai-text').textContent = 'Error connecting to AI. Please try again.';
-  }
-
-  btn.disabled = false; btn.textContent = 'Analyze patient →';
+  btn.disabled=false;btn.textContent='Analyze patient →';
 }
 
-// Init
-renderTrend();
-window.addEventListener('resize', renderTrend);
+// ── Init ─────────────────────────────────────────────────────────
+renderPortal();
+window.addEventListener('resize',()=>{ if(activePatientId) renderTrend(); });
 </script>
 </body>
 </html>
